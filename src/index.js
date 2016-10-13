@@ -1,7 +1,18 @@
-import style from './index.css'
+import {on, stream, scan} from 'flyd'
+import {initialState, reducer} from 'store'
 
-const div = document.createElement('div')
-div.innerHTML = '<h1>Hello World</h1>'
-div.className = style.component
+import * as collateral from 'collateral'
 
-document.getElementById('tesselation').appendChild(div)
+const push = stream()
+
+const store = scan(reducer, initialState, push)
+
+const collateralWithPush = mapObjIndexed((f) => f(push), collateral)
+
+const update = (state) =>
+  mapObjIndexed(
+    (f) => f instanceof Function && f(state),
+    collateralWithPush
+  )
+
+on(update, store)
