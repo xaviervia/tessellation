@@ -9,6 +9,6 @@ export default (push) => (state) => state.shared.points.length === 0 &&
     type: APP_SEED,
     payload: map(
       () => [floor(random() * 100), floor(random() * 100)],
-      range(0, 10)
+      range(0, 9)
     )
   })
