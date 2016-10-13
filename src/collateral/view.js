@@ -2,6 +2,8 @@ import React, {Component} from 'react'
 import {render} from 'react-dom'
 import {view} from 'ramda'
 
+import Button from 'components/Button'
+
 import * as selectors from 'selectors'
 import {APP_UNDO, POINTS_ADD, POINTS_CLEANUP} from 'actions'
 
@@ -18,15 +20,19 @@ export default (push) => {
     render () {
       return this.state && <main>
         <header>
-          <button onClick={() => push({ type: APP_UNDO })}>
+          <Button
+            onClick={() => push({ type: APP_UNDO })}
+            title='undo'>
             ⎌
-          </button>
+          </Button>
 
-          <button onClick={() => push({ type: POINTS_CLEANUP })}>
+          <Button
+            onClick={() => push({ type: POINTS_CLEANUP })}
+            title='reseed'>
             ✕
-          </button>
+          </Button>
 
-          {view(selectors.id, this.state.storeData)}
+          <span className='id'>{view(selectors.id, this.state.storeData)}</span>
         </header>
 
         <svg
