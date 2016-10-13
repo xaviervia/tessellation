@@ -1,0 +1,12 @@
+{
+  "name": "tesselation",
+  "version": "0.1.0",
+  "description": "Experimenting with Redux-like app using Ramda and Flyd",
+  "main": "index.js",
+  "repository": {
+    "url": "git+https://github.com/xaviervia/tesselation.git",
+    "type": "git"
+  },
+  "author": "Fernando Vía Canel <fernando.via@gmail.com>",
+  "license": "MIT"
+}
