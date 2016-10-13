@@ -26,12 +26,12 @@ const withUndo = (reducer) => (state, {type, payload}) => {
 
       return reducer({
         ...restOfState,
-        history: [...history, restOfState]
+        history: [...(history || []), restOfState]
       }, {type, payload})
   }
 }
 
-const reducer = (state, {type, payload}) => {
+export const reducer = withUndo((state, {type, payload}) => {
   switch (type) {
     case actions.APP_RESIZE:
       return set(
@@ -63,8 +63,8 @@ const reducer = (state, {type, payload}) => {
     case actions.POINTS_ADD:
       return set(
         selectors.points,
-        [...view(pointsLens, state), payload],
+        [...view(selectors.points, state), payload],
         state
       )
   }
-}
+})

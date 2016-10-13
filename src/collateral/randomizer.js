@@ -1,4 +1,5 @@
 import {map, range} from 'ramda'
+import {APP_SEED} from 'actions'
 
 const {floor, random} = Math
 

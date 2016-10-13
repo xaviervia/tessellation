@@ -14,10 +14,8 @@ export default (push) => {
     }
 
     render () {
-      const {storeData} = this.state
-
-      return storeData && <div>
-        {view(selectors.id, storeData)}
+      return this.state && <div>
+        {view(selectors.id, this.state.storeData)}
       </div>
     }
   }

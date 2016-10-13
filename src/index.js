@@ -1,4 +1,5 @@
 import {on, stream, scan} from 'flyd'
+import {mapObjIndexed} from 'ramda'
 import {initialState, reducer} from 'store'
 
 import * as collateral from 'collateral'
