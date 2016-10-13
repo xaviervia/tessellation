@@ -14,10 +14,16 @@ const store = scan(reducer, initialState, push)
 
 const collateralWithPush = mapObjIndexed((f) => f(push), collateral)
 
-const update = (state) =>
-  mapObjIndexed(
-    (f) => f instanceof Function && f(state),
-    collateralWithPush
-  )
+let prevState
+
+const update = (state) => {
+  if (prevState !== state) {
+    mapObjIndexed(
+      (f) => f instanceof Function && f(state),
+      collateralWithPush
+    )
+    prevState = state
+  }
+}
 
 on(update, store)

@@ -22,6 +22,7 @@
     "test:unit:watch": "npm run test:unit -- --watch"
   },
   "dependencies": {
+    "d3-voronoi": "^1.0.2",
     "flyd": "^0.2.2",
     "jiff": "^0.7.3",
     "left-pad": "^1.1.3",

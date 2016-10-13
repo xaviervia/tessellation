@@ -1,11 +1,14 @@
 import React, {Component} from 'react'
 import {render} from 'react-dom'
-import {view} from 'ramda'
+import {map, view} from 'ramda'
+import {voronoi} from 'd3-voronoi'
 
 import Button from 'components/Button'
 
 import * as selectors from 'selectors'
 import {APP_UNDO, POINTS_ADD, POINTS_CLEANUP} from 'actions'
+
+import normalize from 'lib/normalize'
 
 export default (push) => {
   let onState
@@ -18,7 +21,24 @@ export default (push) => {
     }
 
     render () {
-      return this.state && <main>
+      if (this.state == null) {
+        return false
+      }
+
+      const {storeData} = this.state
+      const dots = map(
+        ([x, y]) => [
+          normalize(storeData.local.size.width + 20)(100, x),
+          normalize(storeData.local.size.height + 20)(100, y)
+        ],
+        view(selectors.points, storeData)
+      )
+
+      const scale = 1
+      const diagram = voronoi().extent([[0, 0], [storeData.local.size.width, storeData.local.size.height]])(dots)
+      const polygons = diagram.polygons()
+
+      return <main>
         <header>
           <Button
             onClick={() => push({ type: APP_UNDO })}
@@ -32,7 +52,7 @@ export default (push) => {
             ✕
           </Button>
 
-          <span className='id'>{view(selectors.id, this.state.storeData)}</span>
+          <span className='id'>{view(selectors.id, storeData)}</span>
         </header>
 
         <svg
@@ -41,8 +61,21 @@ export default (push) => {
             type: POINTS_ADD,
             payload: [e.clientX, e.clientY]
           })}
-          width='100vw'
-        />
+          viewBox={`5 5 ${storeData.local.size.width - 20} ${storeData.local.size.height - 20}`}
+          width='100vw'>
+          <g className='polygons'>
+            {polygons.map((polygon, index) => <polygon
+              key={index}
+              points={polygon.map((corner) => corner.map((x) => x * scale).join(',')).join(' ')}
+            />)}
+          </g>
+
+          <g className='circles'>
+            {dots.map(([x, y], index) =>
+              <circle key={index} cx={x * scale} cy={y * scale} r='2' />
+            )}
+          </g>
+        </svg>
       </main>
     }
   }

@@ -1585,6 +1585,10 @@ d@^0.1.1, d@~0.1.1:
   dependencies:
     es5-ext "~0.10.2"
 
+d3-voronoi:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/d3-voronoi/-/d3-voronoi-1.0.2.tgz#09b1a3a7891c4ed8376d9ffdb2e770430f3f55c3"
+
 dashdash@^1.12.0:
   version "1.14.0"
   resolved "https://registry.yarnpkg.com/dashdash/-/dashdash-1.14.0.tgz#29e486c5418bf0f356034a993d51686a33e84141"
