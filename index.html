@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>tesselation</title>
+  <link rel="stylesheet" href="https://unpkg.com/tachyons@4.5.3/css/tachyons.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+
+  <style>
+    body {
+      overflow: hidden;
+    }
+
+    header {
+      display: block;
+      left: 0;
+      padding: 2rem;
+      position: absolute;
+      top: 0;
+    }
+
+    button {
+      cursor: pointer;
+      color: #96ccff;
+      height: 1rem;
+      padding: 0;
+      position: relative;
+      width: 1rem;
+    }
+
+    button + button {
+      margin-left: 1rem;
+    }
+
+    button:hover {
+      color: #cdecff;
+    }
+
+    button:focus {
+      outline: none;
+    }
+
+    button .below {
+      color: #357edd;
+      display: none;
+      font-size: .875rem;
+      left: 50%;
+      position: absolute;
+      transform: translateX(-50%);
+      top: 1.5rem;
+    }
+
+    button:hover .below {
+      display: block;
+    }
+
+    button + .id {
+      color: #357edd;
+      display: inline-block;
+      margin-left: 1rem;
+    }
+
+    .circles {
+      fill: #00449e;
+    }
+
+    .polygons {
+      fill: none;
+      stroke: #357edd;
+    }
+  </style>
+</head>
+<body class="bg-navy washed-blue sans-serif">
+  <div id="tesselation"></div>
+<script type="text/javascript" src="index-da5546b6bd8c33e564e0.js"></script></body>
+</html>
