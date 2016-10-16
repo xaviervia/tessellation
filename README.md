@@ -2,7 +2,9 @@
 
 This project is a thesis on how to build front end applications.
 
-**Tesselation** is a simple but not trivial application with various features that require several distinct side effects, such as:
+**Tesselation** is a simple but not trivial application that keeps a set of points in the state and renders them as a [Voronoi tesselation](https://en.wikipedia.org/wiki/Voronoi_diagram) with a little help from [d3](https://d3js.org/) and [React](https://facebook.github.io/react/).
+
+## Features
 
 - Automatic saving locally in the browser.
 - Automatic synchronization across browser tabs/windows.
@@ -10,21 +12,40 @@ This project is a thesis on how to build front end applications.
 - Rendering a SVG diagram and doing mouse interactions with it.
 - Seeding with random data.
 
-The purpose of having several distinct side effect types is to explore a common way of dealing with them. The side effects are chosen because they are realistic requirements of many modern front end applications, but they are also stand ins for any side effect sharing a core characteristic: the [effect directionality](#effect-directionality). More on that later.
+The point here is to explore a common way of dealing with all the distinct types of side effects. The side effects are chosen because they are realistic requirements of many modern front end applications, but they are also stand ins for any side effect sharing a core characteristic: the [effect directionality](#effect-directionality). More on that later.
 
-Another purpose of the thesis is the apply to the architecture several principles that are very present in the current front end programming trends:
+## Principles
 
-- Side effects are wired to the core logic with a reactive programming approach.
-- Core application logic is purely functional: that is, it's composed entirely of pure functions, and it's implemented using functional programming patterns.
+- [Core application logic](#core-application-logic) is purely functional: that is, it's done entirely with pure functions, and it's implemented using functional programming patterns.
 - Core application logic [is also composable](#state-logic-composition).
-- All side effects are treated in the same way, and divided into three subcategories:
-  - Outgoing
-  - Incoming
-  - Bidirectional
+- [Side effects](#effects) are wired to the state using a reactive programming approach.
+- All side effects are treated in the same way.
 
 Also, as much as possible, the implementation does not rely on libraries that would obscure it and make the thesis of how to build the app dependent on the particular choice of tools. So you could say that minimalism is also one of the goals.
 
-And before going on, a disclaimer: please don't take this project too seriously or assume that I'm completely sold on the ideas that I put together here. This is an experiment, and while I'm rather happy with the results, there are no simple answers in programming.
+### A note on the status of this thesis
+
+Before going on, a disclaimer: please don't take this project too seriously or assume that I'm completely sold on the ideas that I put together here. This is an experiment, and while I'm rather happy with the results, there are no simple answers in programming. It will also likely evolve, and if that's the case I'll continue publishing the new versions as I refine the ideas in the architecture.
+
+#### Libraries
+
+There are several libraries used throughout this project. The architecture, however, is built so that none of those libraries is indispensable to the underlying thesis, so don't get too fixated on the choice of libraries. It's extremely likely that the libraries will vary from context to context, while hopefully the underlying approach will not.
+
+##### [ramda](ramdajs.com)
+
+Ramda is the Swiss army knife of the functional programming community in JavaScript. It supports a close analog of the Prelude standard library of Haskell, and takes type signatures, performance, consistency and the functional principles very seriously. It provides a good basis that is lacking the JavaScript standard library, and as such is extremely useful for building applications using functional programming principles.
+
+That said, a lot of the functions from Ramda can be found in plain modern ES when using something as the [Babel polyfills](https://babeljs.io/docs/usage/polyfill/), or plain old [lodash](https://lodash.com/), or [1-liners](https://github.com/1-liners/1-liners), etc.
+
+##### [flyd](https://github.com/paldepind/flyd)
+
+Flyd is the most minimalistic and elegant reactive programming library that I could find. It provides an extremely easy way of creating streams a no-nonsense way of dealing with them. Also, it follows the [fantasy-land](https://github.com/fantasyland/fantasy-land) specification, which means flyd's streams interoperate fantastically with Ramda (although I'm not making use of that at all in this project).
+
+There are many alternatives to flyd out there. For the scope of this thesis, maybe the most prominent is [Redux](redux.js.org) itself, but if you are looking for a more general reactive programming toolkit you can take a look at [most](https://github.com/cujojs/most) or [Rx](https://github.com/Reactive-Extensions/RxJS).
+
+##### [react](https://facebook.github.io/react/)
+
+I'm assuming React needs no introduction. The point there is to make explicit that _even React_ is not necessary for this architecture to work. Of course, as long as the side effects are treated as a function that is called each time a new state is generated, a reactive UI library is ideal for the wiring to be simple to do. But React is not alone there: you can also try out [Preact](https://github.com/developit/preact), or [Act](https://github.com/act-framework/act) or [virtual-dom](https://github.com/Matt-Esch/virtual-dom) directly.
 
 ## Let's get started
 
@@ -50,12 +71,42 @@ Let's try a couple of things to demonstrate the features of the app:
 
 6. Try clearing up the whole thing (?) it will be reseeded.
 
+## Project structure
+
+The file structure of the application is significant for the architecture: not because of a convention of how to name the file, Ruby on Rails style, but because hopefully the file and folder names themselves give already a good grasp of how the architecture works. One of my goals in general when maintaining a codebase is trying to achieve a file structure that:
+
+1. Follows naturally from the architecture.
+2. It's concise.
+3. Says something to the new developer about where and what things are.
+
 ## Core application logic
+
+The application logic is contained in the `src` folder and the `src/reducers` folder. In the `src` folder, for the application logic you can find:
+
+- `actions.js` contains the constant declarations for the action types. I'm using `Symbol`s because I wanted to try them out as action types, inspired in [Keith Cirkel's Metaprogramming in ES6: Symbol's and why they're awesome](https://www.keithcirkel.co.uk/metaprogramming-in-es6-symbols/). And it turned out great, but of course I've only tried it in Chrome, so it might not fly for a real application.
+
+  If they are though, Symbols are a great way of setting up these kind of "unique value" identifiers: since they are impossible to reproduce without a direct reference to the Symbol itself, the integrity of the action name is guaranteed, and there is no possibility of naming collisions. (it might still be confusing when debugging though).
+
+- `index.html` is the HTML entry point. [Sagui](https://github.com/saguijs/sagui) will configure webpack to load it with the corresponding `index.js`
+
+- `index.js` is the JavaScript entry point. It's the only place where the effects meet the store, and the place where the application wiring is done. Note that, unlike many React applications, the `index.js` is _not in charge or rendering_: this is because rendering the view is considered just another of the effects, and not a core part of the application (core !== important, core just means where the logic resides).
+
+- `lenses.js` is the only file that is, to some extent, a **Ramda** artifact. Ramda provides this really cool functionality for selecting values in nested object structures that is done via [`lensPath`](http://ramdajs.com/docs/#lensPath) functions, which combined with [`view`](http://ramdajs.com/docs/#view) and [`set`](http://ramdajs.com/docs/#set) make for great ways of querying and immutably setting values in a complex state object. I still haven't decided what to do with this file.
+
+- `selectors.js` contains the functions that make it easy to query the state blob.
+
+- `store.js` contains the initial state blob and the reducer, which is in turn built from all the high order reducers in `reducers/`.
+
+- `reducers/` contains files with each of the high order reducers.
+
+It's important to notice that, with the exception of `index.js` that has the streams, _all of the above mentioned as pure functions_. There is nothing weird going on in them, and any complexity is derived mostly from the complexity of the application functionality itself. I consider this one of the biggest achievements of this proposed architecture.
+
+> Note: the `reducers/debuggable.js` high order reducer is also not pure, but the intent of that reducer is just to introspect the state while in development, so it doesn't really count.
 
 The whole application state is contained in a single object blob, Redux-style. Actually, the whole architecture is heavily inspired by Redux, but with two core differences:
 
-- Not using Redux, to prove that the "single object" state approach goes beyond libraries and it's easily reproducible with any reactive programming library.
-- Higher decoupling from the UI: Redux is originally meant to represent the data necessary to drive the UI, and the patterns that emerged around it reflect that intent. The thesis here is that the way Redux drives state actually applies to the management of any type of side effect, not just UI, and for that purpose I introduced a generalized wiring interface that, the thesis goes, can be used for _any_ side effect.
+- To prove that the "single object" state approach goes beyond libraries and it's easily reproducible with any reactive programming library, it's not using Redux.
+- It is highly decoupled from the UI: Redux was originally meant to represent the data necessary to drive the UI, and the patterns that emerged around it reflect that intent. The thesis here is that the way Redux drives state can be used to manage any type of side effect, and for that purpose I introduced a generalized wiring interface that, the thesis goes, can be used for _any_ side effect.
 
 To emphasize the fact that the architecture is meant to be a generalization of Redux and not another Flux implementation (?), the nomenclature is slightly different:
 - `dispatch` is called `push` to represent the fact that the actual operation of dispatching an action is analogous to pushing into an array structure. As a matter of fact, it's pushing data into a stream that get's reduced on each addition – or `scan`ned in `flyd` lingo.
@@ -149,6 +200,36 @@ In the `src/effects` folder you can find the implementation of all the side effe
 - Bidirectional: Effects that react to the state _and_ inject information into it via actions:
   - [LocalStorage](src/effects/localStorage.js): when first invoked, it checks if there is an entry in `localStorage` for `tesselation`, and if there is, it immediately pushes an action with the previously saved state. It also sets up a listener on the window `storage` event, and whenever said `tesselation` entry is updated it pushes another state override, thus keeping it in sync with whatever other instance of the application is running in a different window or tab (this will conspire with another effect and come back to bite us in one of the gotchas).
 
+### Effect wiring API
+
+Effects are wired to the store with a simple API: each effect is a function with the signature (in [Flowtype annotations](https://flowtype.org/)):
+
+```javascript
+type FluxAction = {
+  type: Symbol,
+  payload: any
+}
+
+type Effect = (push: (action: FluxAction) => void) => ?(state: any) => void
+```
+
+For example, wiring so that the state is simply logged each time it is updated is easy enough:
+
+```javascript
+export default (push) => (state) => console.log(state)
+```
+
+Another thing that you can do is to push an action the moment the application is setup. This is useful to initialize values on startup. For that case we can use a little API sugar: since the `(state: any) => void` part of the signature is optional (preceded by a `?`) we can push directly:
+
+```javascript
+import {RANDOM_VALUE} from 'actions'
+
+export default (push) => push({
+  type: RANDOM_VALUE,
+  payload: Math.random()
+})
+```
+
 ### The effects
 
 Next follows an explanation (?)
@@ -191,7 +272,7 @@ TODO: Where should the logic for preprocessing the actions be done?
 
 ## Credits and references
 
-- [Redux](http://redux.js.org/) which heavily inspired this architecture.
-- @joaomilho who originally gave me the idea of using [`flyd`](https://github.com/paldepind/flyd) to re implement the Redux store.
+- [Redux](http://redux.js.org/) which "single reducer" idea heavily inspired this architecture.
+- @joaomilho who originally gave me the idea of using [`flyd`](https://github.com/paldepind/flyd) to re implement the Redux store, and who's [Act framework](https://github.com/act-framework/act) and [Ion language](https://github.com/ion-lang/ion) motivated the wish to do more and more functional and reactive programming in JavaScript.
 - @Nevon's [demystifying Redux](https://gist.github.com/Nevon/eada09788b10b6a1a02949ec486dc3ce)
--
+- []
