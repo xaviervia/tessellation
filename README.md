@@ -18,12 +18,12 @@ This project is a thesis on how to build front end applications.
 - Rendering a SVG diagram and doing mouse interactions with it.
 - Seeding with random data.
 
-The point here is to explore a common way of dealing with all the distinct types of side effects. The side effects are chosen because they are realistic requirements of many modern front end applications, but they are also stand ins for any side effect sharing a core characteristic: the [effect directionality](#effect-directionality). More on that later.
+The point here is to explore a common way of dealing with all the distinct types of side effects. The side effects are chosen because they are realistic requirements of many modern front end applications. They also cover the full spectrum of [effect directionalities](#effect-directionality), so in theory any side effect could be implemented with the same APIs. More on that later.
 
 ## Principles
 
-- [Core application logic](#core-application-logic) is purely functional: that is, it's done entirely with pure functions, and it's implemented using functional programming patterns.
-- Core application logic [is also composable](#state-logic-composition).
+- The [core application logic](#core-application-logic) is purely functional: that is, it's done entirely with pure functions, and it's implemented using functional programming patterns.
+- The core application logic [is also composable](#composing-the-state-management-logic-from-smaller-pieces).
 - [Side effects](#effects) are wired to the state using a reactive programming approach.
 - All side effects are treated in the same way.
 
@@ -31,27 +31,27 @@ Also, as much as possible, the implementation does not rely on libraries that wo
 
 ### A note on the status of this thesis
 
-Before going on, a disclaimer: please don't take this project too seriously or assume that I'm completely sold on the ideas that I put together here. This is an experiment, and while I'm rather happy with the results, there are no simple answers in programming. It will also likely evolve, and if that's the case I'll continue publishing the new versions as I refine the ideas in the architecture.
+Before going on, a disclaimer: please don't take this project too seriously or assume that I'm completely sold on the ideas that I put together here. This is an experiment, and while I'm rather happy with the results, there are no simple answers in programming. It will also likely evolve, and if that's the case I'll continue publishing the new versions as I refine the ideas that make up the architecture.
 
 #### Libraries
 
-There are several libraries used throughout this project. The architecture, however, is built so that none of those libraries is indispensable to the underlying thesis, so don't get too fixated on the choice of libraries. It's extremely likely that the libraries will vary from context to context, while hopefully the underlying approach will not.
+There are several libraries used throughout this project. The architecture, however, is built so that none of these is indispensable to the underlying thesis, so don't get too fixated on the choice of libraries. It's extremely likely that the libraries will vary from context to context, while hopefully the underlying approach will not.
 
 ##### [ramda](ramdajs.com)
 
-Ramda is the Swiss army knife of the functional programming community in JavaScript. It supports a close analog of the Prelude standard library of Haskell, and takes type signatures, performance, consistency and the functional principles very seriously. It provides a good basis that is lacking the JavaScript standard library, and as such is extremely useful for building applications using functional programming principles.
+Ramda is the Swiss army knife of the functional programming community in JavaScript. It supports a close analog of the [Prelude](https://hackage.haskell.org/package/base-4.9.0.0/docs/Prelude.html) standard library of [Haskell](https://www.haskell.org/), and takes type signatures, performance, consistency and the functional principles very seriously. It provides a good foundation of functions that is lacking the JavaScript standard library, and as such is extremely useful for building applications using functional programming principles.
 
 That said, a lot of the functions from Ramda can be found in plain modern ES when using something as the [Babel polyfills](https://babeljs.io/docs/usage/polyfill/), or plain old [lodash](https://lodash.com/), or [1-liners](https://github.com/1-liners/1-liners), etc.
 
 ##### [flyd](https://github.com/paldepind/flyd)
 
-Flyd is the most minimalistic and elegant reactive programming library that I could find. It provides an extremely easy way of creating streams a no-nonsense way of dealing with them. Also, it follows the [fantasy-land](https://github.com/fantasyland/fantasy-land) specification, which means flyd's streams interoperate fantastically with Ramda (although I'm not making use of that at all in this project).
+Flyd is the most minimalistic and elegant reactive programming library that I could find. It provides an extremely easy way of creating streams a no-nonsense way of dealing with them. It follows the [fantasy-land](https://github.com/fantasyland/fantasy-land) specification, which means flyd streams interoperate fantastically with Ramda (although I'm not making use of that at all in this project).
 
-There are many alternatives to flyd out there. For the scope of this thesis, maybe the most prominent is [Redux](redux.js.org) itself, but if you are looking for a more general reactive programming toolkit you can take a look at [most](https://github.com/cujojs/most) or [Rx](https://github.com/Reactive-Extensions/RxJS).
+There are many alternatives to flyd out there. For the scope of this thesis, maybe the most prominent is [Redux](redux.js.org) itself, but if you are looking for a more complete reactive programming toolkit you can take a look at [most](https://github.com/cujojs/most) or [Rx](https://github.com/Reactive-Extensions/RxJS).
 
 ##### [react](https://facebook.github.io/react/)
 
-I'm assuming React needs no introduction. The point there is to make explicit that _even React_ is not necessary for this architecture to work. Of course, as long as the side effects are treated as a function that is called each time a new state is generated, a reactive UI library is ideal for the wiring to be simple to do. But React is not alone there: you can also try out [Preact](https://github.com/developit/preact), or [Act](https://github.com/act-framework/act) or [virtual-dom](https://github.com/Matt-Esch/virtual-dom) directly.
+I'm assuming React needs no introduction. The point here is that _not even React_ is necessary for this architecture to work. Of course, as long as the side effects are treated as a function that is called each time a new state is generated, a reactive UI library is ideal for the wiring to be simple to do. But React is not alone there: you can also try out [Preact](https://github.com/developit/preact), or [Act](https://github.com/act-framework/act) or [virtual-dom](https://github.com/Matt-Esch/virtual-dom) directly.
 
 ## Let's get started
 
@@ -114,7 +114,7 @@ To emphasize the fact that the architecture is meant to be a generalization of R
 - `dispatch` is called `push` to represent the fact that the actual operation of dispatching an action is analogous to pushing into an array structure. As a matter of fact, it's pushing data into a stream that get's reduced on each addition – or `scan`ned in `flyd` lingo.
 - There is no `getState`. State is always pushed to the effects as an object each time the application state is updated.
 
-### State logic composition
+### Composing the state management logic from smaller pieces
 
 Redux reducer composition is some times done with the [`combineReducers`](http://redux.js.org/docs/api/combineReducers.html) utility, that segments the state into several disconnected namespaces that the reducers target separately. In the past I had real problems with this approach though: long story short, keeping reducers from affecting each other lead to manufacture artificial actions to be able to communicate between them (TODO: expand). The documentation itself warns about `combineReducers` [being just a convenience](http://redux.js.org/docs/api/combineReducers.html#tips) though, so I tried exploring alternative ways of working with several reducers.
 
