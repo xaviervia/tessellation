@@ -28,11 +28,11 @@ They also cover the full spectrum of [effect directionalities](#effect-direction
 - The core application logic [is composable](#composing-the-state-management-logic-from-smaller-pieces).
 - [Side effects](#effects) are wired to the state using a reactive programming approach.
 - All side effects are treated in the same way.
-- Use few libraries and use them as little as possible.
+- Few libraries are used and they are used as little as possible.
 
 ### A note on the status of this thesis
 
-Before going on, a disclaimer: please don't take this project too seriously or assume that I'm completely sold on the ideas that I put together here. This is an experiment, and while I'm rather happy with the results, there are no simple answers in programming. It will also likely evolve, and if that's the case I'll continue publishing the new versions as I refine the ideas that make up the architecture.
+Please don't take this project too seriously or assume that I'm completely sold on the ideas that I put together here. This is an experiment, and while I'm rather happy with the results, there are no simple answers in programming. It will also likely evolve, and if that's the case I'll continue publishing the new versions as I refine the ideas that make up the architecture.
 
 ## Libraries
 
@@ -40,19 +40,19 @@ There are several libraries used throughout this project. The architecture, howe
 
 ### Functional: [Ramda](ramdajs.com)
 
-Ramda is the Swiss army knife of the functional programming community in JavaScript. It supports a close analog of the [Prelude](https://hackage.haskell.org/package/base-4.9.0.0/docs/Prelude.html) standard library of [Haskell](https://www.haskell.org/), and takes type signatures, performance, consistency and the functional principles very seriously. It provides a good foundation of functions that is lacking the JavaScript standard library, and as such is extremely useful for building applications using functional programming principles.
+Ramda is the Swiss army knife of the functional programming community in JavaScript. It supports a close analog of the [Prelude](https://hackage.haskell.org/package/base-4.9.0.0/docs/Prelude.html) standard library of [Haskell](https://www.haskell.org/), and takes type signatures, performance, consistency and the functional principles very seriously. It provides a good foundation of functions that is lacking in the JavaScript standard library, and as such is extremely useful for building applications using functional programming principles.
 
-That said, a lot of the functions from Ramda can be found in plain modern ES when using something as the [Babel polyfills](https://babeljs.io/docs/usage/polyfill/), or plain old [lodash](https://lodash.com/), or [1-liners](https://github.com/1-liners/1-liners), etc.
+That said, a lot of the functions from Ramda can be found in plain modern ES when using something as the [Babel polyfills](https://babeljs.io/docs/usage/polyfill/). You can also find many of those in [lodash](https://lodash.com/), [1-liners](https://github.com/1-liners/1-liners), etc.
 
 ### Reactive: [Flyd](https://github.com/paldepind/flyd)
 
-Flyd is the most minimalistic and elegant reactive programming library that I could find. It provides an extremely easy way of creating streams a no-nonsense way of dealing with them. It follows the [fantasy-land](https://github.com/fantasyland/fantasy-land) specification, which means flyd streams interoperate fantastically with Ramda (although I'm not making use of that at all in this project).
+Flyd is the most minimalistic and elegant reactive programming library that I could find. It provides an extremely easy way of creating streams a no-nonsense way of dealing with them. It follows the [fantasy-land](https://github.com/fantasyland/fantasy-land) specification, which means Flyd streams interoperate fantastically with Ramda (although I'm not making use of that at all in this project).
 
-There are many alternatives to flyd out there. For the scope of this thesis, maybe the most prominent is [Redux](redux.js.org) itself, but if you are looking for a more complete reactive programming toolkit you can take a look at [most](https://github.com/cujojs/most) or [Rx](https://github.com/Reactive-Extensions/RxJS).
+There are many alternatives to Flyd out there. For the architecture suggested here, maybe the most relevant is [Redux](redux.js.org) itself, but if you are looking for a more complete reactive programming toolkit you can take a look at [most](https://github.com/cujojs/most) or [Rx](https://github.com/Reactive-Extensions/RxJS).
 
 ### Rendering: [React](https://facebook.github.io/react/)
 
-I'm assuming React needs no introduction. The point here is that _not even React_ is necessary for this architecture to work. Of course, as long as the side effects are treated as a function that is called each time a new state is generated, a reactive UI library is ideal for the wiring to be simple to do. But React is not alone there: you can also try out [Preact](https://github.com/developit/preact), or [Act](https://github.com/act-framework/act) or [virtual-dom](https://github.com/Matt-Esch/virtual-dom) directly.
+I'm assuming React needs no introduction. The point here is that _not even React_ is necessary for this architecture to work. Of course, as long as the side effects are treated as a function that is called each time a new state is generated, a reactive UI library is ideal for the wiring to be simple to do. But React is not alone there: you can also try out [Preact](https://github.com/developit/preact), or [Act](https://github.com/act-framework/act), or [virtual-dom](https://github.com/Matt-Esch/virtual-dom) directly.
 
 ## Let's get started
 
@@ -120,9 +120,9 @@ The application logic is contained in the files placed directly under the `src` 
 
 - `index.html` is the HTML entry point. [Sagui](https://github.com/saguijs/sagui) will configure [Webpack](https://webpack.github.io/) to load it with the corresponding `index.js`.
 
-- `index.js` is the JavaScript entry point. It's the only place where the effects meet the store, and the place where the application wiring is done. Note that, unlike many React applications, the `index.js` is _not in charge or rendering_: rendering the view is considered just another effect. Rendering is not part of the core of the application.
+- `index.js` is the JavaScript entry point. It's the only place where the effects meet the store, and the place where the application wiring is done. Note that, unlike in many other React applications, the `index.js` is _not in charge of rendering_: rendering the view is considered just another effect. Rendering is not part of the core of the application.
 
-  > This doesn't mean that rendering is not _important_. As stated above, effects are the whole point of an application. Saying that rendering is not part of the core means only that rendering is not state management logic.
+  > This doesn't mean that rendering is not _important_. As stated below, [effects are the whole point of an application](#effects). Saying that rendering is not part of the core means only that rendering is not state management logic.
 
 - `lenses.js` is the only file that is, to some extent, a **Ramda** artifact. Ramda provides this really cool functionality for selecting values in nested object structures that is done via [`lensPath`](http://ramdajs.com/docs/#lensPath) functions, which combined with [`view`](http://ramdajs.com/docs/#view) and [`set`](http://ramdajs.com/docs/#set) make for great ways of querying and immutably setting values in a complex state object. I still haven't decided what to do with this file.
 
@@ -142,7 +142,7 @@ The whole application state is contained in a single object blob, Redux-style. A
 - It is highly decoupled from the UI: Redux was originally meant to represent the data necessary to drive the UI, and the patterns that emerged around it reflect that intent. The thesis here is that the way Redux drives state can be used to manage any type of side effect, and for that purpose I introduced a generalized wiring interface that, the thesis goes, can be used for _any_ side effect.
 
 To emphasize the fact that the architecture is meant to be a generalization of Redux and not another Flux implementation (as in, another way of doing React), the nomenclature is slightly different:
-- `dispatch` is called `push` to represent the fact that the actual operation of dispatching an action is analogous to pushing into an array structure. As a matter of fact, it's pushing data into a stream that gets reduced on each addition – or `scan`ned in `flyd` lingo.
+- `dispatch` is called `push` to represent the fact that the actual operation of dispatching an action is analogous to pushing into an array structure. As a matter of fact, it's pushing data into a stream that gets reduced on each addition – or `scan`ned in Flyd lingo.
 - There is no `getState`. State is pushed to the effects as an object each time the store gets updated.
 
 ### Composing the state management logic from smaller pieces
@@ -204,9 +204,9 @@ const additionHighOrderReducer = (property, actionType) => (reducer) => (state, 
 
 The other obvious advantage is that a HOR can manipulate the result of another reducer, introducing the intriguing possibility of performing meta-actions in the state.
 
-### The `undo` high order reducer
+### The undoable high order reducer
 
-The following is the very simple implementation of the `undo` HOR that can be found in `src/reducers/undoable.js`:
+The following is the very simple implementation of the undoable HOR that can be found in `src/reducers/undoable.js`:
 
 ```javascript
 export default (actions) => (reducer) => (state, {type, payload}) => {
@@ -239,7 +239,7 @@ Well, simple enough:
 
 ```javascript
 const reducer = compose(
-  undoHOR(APP_UNDO),
+  undoable(APP_UNDO),
   appHOR,
   pointsHOR
 )((x) => x)
@@ -265,9 +265,9 @@ Any number of HORs can be chained in this way. Hopefully we can explore further 
 
 Now to the fun part.
 
-The application store can be seen as a _stream_. A stream get's updated continuously each time that something is pushed into each, and then it gets split into several streams that each land into a different effect. That is the conceptual picture: the actual implementation will vary since, while this schema is true for how Redux work, the Redux store is not an actual reactive stream, and even in this application the store stream is not literally split and sent down to the effects. But the analogy still holds.
+The application store can be seen as a _stream_. A stream gets updated continuously each time that something is pushed into each, and then it gets split into several streams that each land into a different effect. That is the conceptual picture: the actual implementation will vary. For example: while this schema is true for how Redux work, the Redux store is not an actual reactive stream, and even in this application the store stream is not literally split and sent down to the effects. But the analogy still holds.
 
-> Here comes a semantic side note: I'm calling these _effects_ instead of _side effects_ since, as many pointed out, an application without side effects is just a way of transforming electricity into heat. _Effects_ is a correct name: the purpose of applications is in fact to perform effects. Side effects on the other hand refer to the _unintended consequences_ of performing an otherwise functional operation. In informal contexts I will use _effect_ and _side effect_ interchangeably, but I'll try to stick to effects whenever nomenclature is important.
+> Here comes a semantic side note: I'm calling these _effects_ instead of _side effects_ because, as many pointed out, an application without side effects is just a way of transforming electricity into heat. _Effects_ is a correct name: the purpose of applications is in fact to perform effects. Side effects on the other hand refer to the _unintended consequences_ of performing an otherwise functional operation. In informal contexts I will use _effect_ and _side effect_ interchangeably, but I'll try to stick to _effects_ whenever nomenclature is important.
 
 ### Effect directionality
 
@@ -277,7 +277,7 @@ Effects come in different flavors:
 
 - **Outgoing**: Effects that react to the new state by performing some operation, but never inject anything back. [Log](#log-effect) is an Outgoing Effect.
 
-- **Bidirectional**: Effects that react to the state _and_ inject information back into it via actions. [LocalStorage](#localstorage-effect) and [View](#view-effect) are one of these.
+- **Bidirectional**: Effects that react to the state _and_ inject information back into it via actions. [LocalStorage](#localstorage-effect), [Seed](#seed-effect) and [View](#view-effect) are of this type.
 
 Notice that there is no implication whatsoever that incoming and outgoing effects need to be synchronous. As a matter of fact, incoming effects are like hardware interruptions: they are asynchronous and will come at an arbitrary time. This is how the architecture proposed here manages asynchronous operations: if the result of the operation is important to the application state, an asynchronous effect will capture some state change and perform some operation somewhere, only to push an action back into the state whenever (and if) the operation is completed. Notice that as far as the application state is concerned, the temporality between those two events is completely irrelevant.
 
@@ -404,7 +404,7 @@ export default (push) => {
 }
 ```
 
-### Seed
+### Seed effect
 
 > [code](src/effects/seed.js)
 
@@ -529,9 +529,21 @@ The application has two bugs that were left there to demonstrate the kind of qui
 - **Symbols** make for pretty cool action types.
 - **High order reducers** open up a world of possibilities for reusable application state management functions.
 - The **streams** could be useful in the effects as well. The point here was to keep the API library agnostic and minimize the use of Flyd, but I'm pretty sure streams can help out a lot when dealing with more complex incoming side effects, while still keeping the wiring API agnostic.
+- **JSON Patch** diffs can be very useful for debugging and possibly for storing or sharing a log transformations. For example it could be useful to send the patches over a network to keep clients and servers synchronized.
 
 ## Credits and references
 
 - [Redux](http://redux.js.org/) which "single reducer" idea heavily inspired this architecture.
-- @joaomilho who originally gave me the idea of using [`flyd`](https://github.com/paldepind/flyd) to re implement the Redux store, and who's [Act framework](https://github.com/act-framework/act) and [Ion language](https://github.com/ion-lang/ion) motivated the wish to do more and more functional and reactive programming in JavaScript.
-- @Nevon's [demystifying Redux](https://gist.github.com/Nevon/eada09788b10b6a1a02949ec486dc3ce)
+- [@joaomilho](https://github.com/joaomilho) who originally gave me the idea of using [`flyd`](https://github.com/paldepind/flyd) to re implement the Redux store, and who's [Act framework](https://github.com/act-framework/act) and [Ion language](https://github.com/ion-lang/ion) motivated the wish to do more and more functional and reactive programming in JavaScript.
+- [@Nevon](https://github.com/Nevon)'s [demystifying Redux](https://gist.github.com/Nevon/eada09788b10b6a1a02949ec486dc3ce)
+
+---
+
+- [Sagui](https://github.com/saguijs/sagui) is a great way of bootstrapping and building a modern web application without thinking about configuration.
+- [Tachyons](http://tachyons.io/) made the styling a breeze.
+- [d3](https://d3js.org)'s heavily mathematical approach made it a great tool to work together with Ramda and React.
+- [jiff](https://github.com/cujojs/jiff) is very useful to get JSON diff's between states; diffs that, since they follow the [JSON Patch RFC6902](https://tools.ietf.org/html/rfc6902), can then be applied to the state structure to reproduce the transformation.
+
+## License
+
+[The Unlicense](LICENSE)
