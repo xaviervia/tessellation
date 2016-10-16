@@ -3,7 +3,7 @@ import {mapObjIndexed} from 'ramda'
 import {initialState, reducer} from 'store'
 // import debuggable from 'decorators/debuggable'
 
-import * as collateral from 'collateral'
+import * as effects from 'effects'
 
 const push = stream()
 
@@ -12,7 +12,7 @@ const store = scan(reducer, initialState, push)
 // const store = scan(debuggable(reducer), initialState, push)
 // Also import debuggable from 'decorators/debuggable'
 
-const collateralWithPush = mapObjIndexed((f) => f(push), collateral)
+const effectsWithPush = mapObjIndexed((f) => f(push), effects)
 
 let prevState
 
@@ -20,7 +20,7 @@ const update = (state) => {
   if (prevState !== state) {
     mapObjIndexed(
       (f) => f instanceof Function && f(state),
-      collateralWithPush
+      effectsWithPush
     )
     prevState = state
   }

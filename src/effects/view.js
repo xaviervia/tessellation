@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import {render} from 'react-dom'
-import {map, view} from 'ramda'
+import {map} from 'ramda'
 import {voronoi} from 'd3-voronoi'
 
 import Button from 'components/Button'
@@ -31,7 +31,7 @@ export default (push) => {
           normalize(storeData.local.size.width + 20)(100, x),
           normalize(storeData.local.size.height + 20)(100, y)
         ],
-        view(selectors.points, storeData)
+        selectors.points(storeData)
       )
 
       const scale = 1
@@ -52,7 +52,7 @@ export default (push) => {
             ✕
           </Button>
 
-          <span className='id'>{view(selectors.id, storeData)}</span>
+          <span className='id'>{selectors.id(storeData)}</span>
         </header>
 
         <svg
