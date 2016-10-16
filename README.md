@@ -4,19 +4,19 @@ This project is a thesis on how to build front end applications.
 
 **Tesselation** is a simple but not trivial application with various features that require several distinct side effects, such as:
 
-- Auto saving locally in the browser.
+- Automatic saving locally in the browser.
 - Automatic synchronization across browser tabs/windows.
 - Logging updates to the console.
-- Rendering an SVG diagram and doing mouse interaction with it.
-- Seeding data from random.
+- Rendering a SVG diagram and doing mouse interactions with it.
+- Seeding with random data.
 
-The purpose of having several distinct side effect types is to explore a common way of dealing with them. The side effects are chosen because they are realistic requirements of many modern front end applications, but they are also stand ins for any side effect sharing their characteristics – the [effect directionality](#effect-directionality). More on that later.
+The purpose of having several distinct side effect types is to explore a common way of dealing with them. The side effects are chosen because they are realistic requirements of many modern front end applications, but they are also stand ins for any side effect sharing a core characteristic: the [effect directionality](#effect-directionality). More on that later.
 
 Another purpose of the thesis is the apply to the architecture several principles that are very present in the current front end programming trends:
 
 - Side effects are wired to the core logic with a reactive programming approach.
 - Core application logic is purely functional: that is, it's composed entirely of pure functions, and it's implemented using functional programming patterns.
-- Core application logic is also composable, and this is done by composing high order reducers.
+- Core application logic [is also composable](#state-logic-composition).
 - All side effects are treated in the same way, and divided into three subcategories:
   - Outgoing
   - Incoming
@@ -61,23 +61,116 @@ To emphasize the fact that the architecture is meant to be a generalization of R
 - `dispatch` is called `push` to represent the fact that the actual operation of dispatching an action is analogous to pushing into an array structure. As a matter of fact, it's pushing data into a stream that get's reduced on each addition – or `scan`ned in `flyd` lingo.
 - There is no `getState`. State is always pushed to the effects as an object each time the application state is updated.
 
+### State logic composition
+
+Redux reducer composition is some times done with the [`combineReducers`](http://redux.js.org/docs/api/combineReducers.html) utility, that segments the state into several disconnected namespaces that the reducers target separately. In the past I had real problems with this approach though: long story short, keeping reducers from affecting each other lead to manufacture artificial actions to be able to communicate between them (TODO: expand). The documentation itself warns about `combineReducers` [being just a convenience](http://redux.js.org/docs/api/combineReducers.html#tips) though, so I tried exploring alternative ways of working with several reducers.
+
+TODO: Hmm no -> I consider that a lesson learned. In general reducer combination has been a hairy issue, mainly because affecting a single global state with several functions raises possibilities of collisions.
+
+#### High order reducers
+
+In this project I wanted to explore a pattern for composition of reducers that I first saw presented in React Europe for [undoing](https://github.com/omnidan/redux-undo): high order reducers. In a nutshell, that means that instead of implementing your most basic reducer as:
+
+```javascript
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'ADD':
+      return state + 1
+
+    default:
+      return state
+  }
+}
+```
+
+...you add take another reducer as the first argument and pass it through when you are not interested in the current action:
+
+```diff
+- const reducer = (state, action) => {
++ const highOrderReducer = (reducer) => (state, action) => {
+  switch (action.type) {
+    case 'ADD':
+      return state + 1
+
+    default:
+-      return state
++      return reducer(state, action)
+  }
+}
+```
+
+The advantages are plenty, but the main hidden one I discovered is that this means is very natural to now make your reducers parametrizable, which means they can be _reusable_. In a silly example, let's say that you want to have the above shown _addition_ reducer, but the specific name of the property to be updated and the name of the action are meant to be application dependent. Then you could write your highOrderReducer reducer as:
+
+```javascript
+const additionHighOrderReducer = (property, actionType) => (reducer) => (state, action) => {
+  switch (action.type) {
+    case actionType:
+      return {
+        ...state,
+        [property]: state[property] + 1
+      }
+
+    default:
+      return reducer(state, action)
+  }
+}
+```
+
+The other obvious advantage is that allows a reducer to intercept the state as other reducer processed it and manipulate it in some way or the other, or decide to intercept the propagation of an action by passing forward an empty action type, etc.
+
+#### High order reducer composition
+
+In this application this is effectively being used to achieve the _undo_ functionality. The last piece then is, how to put all the reducers back together?
+
+Well, simple enough (you can see this in the live code in `src/index.js`):
+
+TODO: Actually do in the app!
+```javascript
+const reducer = compose(
+  additionHighOrderReducer('counter', 'ADD'),
+
+)
+```
+
 ## Effects
 
-Here comes another semantic part of the thesis: I'm renaming _side effects_ as _effects_ since, as many pointed out, an application without side effects is just a way of transforming electricity into heat. _Effects_ is a correct name: the purpose of the application are in fact it's effects, while side effects refer to the _unintended_ effects of performing a purely functional operation.
+Here comes another semantic part of the thesis: I'm renaming _side effects_ as _effects_ since, as many pointed out, an application without side effects is just a way of transforming electricity into heat. _Effects_ is a correct name: the purpose of the application are in fact it's effects, while side effects refer to the _unintended_ effects of performing a purely functional operation. In informal contexts I will use _effect_ and _side effect_ interchangeably, but when the specific functionalities of the application will referred solely as _effects_ (?).
 
-In the `src/effects` folder you can find the entry points (and in the case of this application, being so simple, the whole implementation) of all the side effects of the application. They can be cataloged into three categories, and although this categories are not extremely useful they are helpful to understand the why of the wiring API, so I'll explain them briefly:
+TODO: surface area of the application with the outside world: interactions of the application with the outside world.
 
 ### Effect directionality
 
-- Incoming: Effects that only inject data into the application.
-  - [Resize](src/effects/resize.js) listens to `resize` events on the window and pushes an action with the new value.
-  - [Setup](src/effects/setup.js) when initialized, it immediately pushes an action with a newly generated UUID to identify the instance of the application. There is an interesting gotcha here: I initially modeled this as being part of the `initialState` object in the `store`, but you can see how that violates the purity of the store implementation. It's a common temptation to include "one off" effects in the creation of the `initialState`, but that is likely to create problems down the line. It's a good litmus test for the store implementation that no libraries with side effects are used in it.
+In the `src/effects` folder you can find the implementation of all the side effects of the application. They can be cataloged into three _types_, and although these types don't tell much about what the specific effects do, they are helpful to understand why the wiring API has the specific signature that it has, so I'll explain them briefly:
 
-- Outgoing: Effects that react to the new state by performing some operation, but never inject anything back.
-  - [Log](src/effects/log.js) which simply logs the current points each time the state is updated.
+- Incoming: Effects that only inject data into the application. [Resize](#resize) and [Setup](#setup).
+
+- Outgoing: Effects that react to the new state by performing some operation, but never inject anything back. [Log](#log).
 
 - Bidirectional: Effects that react to the state _and_ inject information into it via actions:
   - [LocalStorage](src/effects/localStorage.js): when first invoked, it checks if there is an entry in `localStorage` for `tesselation`, and if there is, it immediately pushes an action with the previously saved state. It also sets up a listener on the window `storage` event, and whenever said `tesselation` entry is updated it pushes another state override, thus keeping it in sync with whatever other instance of the application is running in a different window or tab (this will conspire with another effect and come back to bite us in one of the gotchas).
+
+### The effects
+
+Next follows an explanation (?)
+
+### Resize
+
+> [src/effects/resize.js](src/effects/resize.js)
+
+Listens to `resize` events on the window and pushes an action with the new value:
+
+
+### Setup
+
+> [Code](src/effects/setup.js)
+
+When initialized, it immediately pushes an action with a newly generated UUID to identify the instance of the application. There is an interesting gotcha here: I initially modeled this as being part of the `initialState` object in the `store`, but you can see how that violates the purity of the store implementation. It's a common temptation to include "one off" effects in the creation of the `initialState`, but that is likely to create problems down the line. It's a good litmus test for the store implementation that no libraries with side effects are used in it.
+
+### Log
+
+> [Code](src/effects/log.js)
+
+Simply logs the current points each time the state is updated.
 
 ### Seed
 
