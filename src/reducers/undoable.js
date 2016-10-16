@@ -1,8 +1,8 @@
-export default (actionType) => (reducer) => (state, {type, payload}) => {
+export default (actions) => (reducer) => (state, {type, payload}) => {
   const {undo, ...restOfState} = state // eslint-disable-line no-unused-vars
 
   switch (type) {
-    case actionType:
+    case actions.APP_UNDO:
       return state.undo
 
     default:
