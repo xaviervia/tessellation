@@ -1,14 +1,13 @@
 {
-  "name": "tesselation",
-  "version": "0.1.0",
-  "description": "Experimenting with Redux-like app using Ramda and Flyd",
-  "main": "index.js",
+  "name": "tessellation",
+  "version": "1.0.0",
+  "description": "Thesis on how to build functional, reactive and well structured front end applications",
   "repository": {
-    "url": "git+https://github.com/xaviervia/tesselation.git",
+    "url": "git+https://github.com/xaviervia/tessellation.git",
     "type": "git"
   },
   "author": "Fernando Vía Canel <fernando.via@gmail.com>",
-  "license": "MIT",
+  "license": "The Unlicense",
   "scripts": {
     "build": "sagui build",
     "develop": "sagui develop --port 3000",

@@ -1,9 +1,8 @@
-import {lensPath} from 'ramda'
+import {view} from 'ramda'
+import * as lenses from 'lenses'
 
-export const id = lensPath(['local', 'id'])
+export const id = view(lenses.id)
 
-export const points = lensPath(['shared', 'points'])
+export const points = view(lenses.points)
 
-export const size = lensPath(['local', 'size'])
-
-export const point = (index) => lensPath(['shared', 'points', index])
+export const point = (index) => view(lenses.point(index))

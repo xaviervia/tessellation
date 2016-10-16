@@ -1,10 +1,10 @@
 import {APP_SYNC} from 'actions'
 
 export default (push) => {
-  if (window.localStorage.getItem('tesselation')) {
+  if (window.localStorage.getItem('tessellation')) {
     push({
       type: APP_SYNC,
-      payload: JSON.parse(window.localStorage.getItem('tesselation'))
+      payload: JSON.parse(window.localStorage.getItem('tessellation'))
     })
   }
 
@@ -14,7 +14,7 @@ export default (push) => {
   }))
 
   return (state) => window.localStorage.setItem(
-    'tesselation',
+    'tessellation',
     JSON.stringify(state.shared)
   )
 }
