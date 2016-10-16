@@ -80,7 +80,7 @@ export default (push) => {
     }
   }
 
-  render(<Container />, document.getElementById('tesselation'))
+  render(<Container />, document.getElementById('tessellation'))
 
   return onState
 }
