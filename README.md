@@ -46,13 +46,13 @@ That said, a lot of the functions from Ramda can be found in plain modern ES whe
 
 ### Reactive: [Flyd](https://github.com/paldepind/flyd)
 
-Flyd is the most minimalistic and elegant reactive programming library that I could find. It provides an extremely easy way of creating streams a no-nonsense way of dealing with them. It follows the [fantasy-land](https://github.com/fantasyland/fantasy-land) specification, which means Flyd streams interoperate fantastically with Ramda (although I'm not making use of that at all in this project).
+Flyd is the most minimalistic and elegant reactive programming library that I could find. It provides an extremely easy way of creating streams and no-nonsense way of dealing with them. It follows the [fantasy-land](https://github.com/fantasyland/fantasy-land) specification, which means Flyd streams interoperate fantastically with Ramda (although I'm not making use of that at all in this project).
 
 There are many alternatives to Flyd out there. For the architecture suggested here, maybe the most relevant is [Redux](redux.js.org) itself, but if you are looking for a more complete reactive programming toolkit you can take a look at [most](https://github.com/cujojs/most) or [Rx](https://github.com/Reactive-Extensions/RxJS).
 
 ### Rendering: [React](https://facebook.github.io/react/)
 
-I'm assuming React needs no introduction. The point here is that _not even React_ is necessary for this architecture to work. Of course, as long as the side effects are treated as a function that is called each time a new state is generated, a reactive UI library is ideal for the wiring to be simple to do. But React is not alone there: you can also try out [Preact](https://github.com/developit/preact), or [Act](https://github.com/act-framework/act), or [virtual-dom](https://github.com/Matt-Esch/virtual-dom) directly.
+I'm assuming React needs no introduction. The point here is that _not even React_ is necessary for this architecture to work. Of course, as long as the side effects are treated as a function that is called each time a new state is generated, using a reactive UI library will make the implementation simpler. But React is not the only tool around for that: you can also try out [Preact](https://github.com/developit/preact), [Act](https://github.com/act-framework/act), or [virtual-dom](https://github.com/Matt-Esch/virtual-dom) directly.
 
 ## Let's get started
 
@@ -80,7 +80,7 @@ The tessellation changes it's proportions to fit the new window size. Each time 
 
 ![click](images/click.gif)
 
-One dot is removed, and another dot is aded in roughly the position where you clicked.
+One dot is removed, and another dot is added in roughly the position where you clicked.
 
 > It will be placed _roughly_ where the mouse was because positions are normalized from whatever size your window is to a 100x100 grid, so the application's grid doesn't match the pixels that you see. This action is sent from the [View effect](#view) – which is a React component.
 
@@ -90,13 +90,13 @@ One dot is removed, and another dot is aded in roughly the position where you cl
 
 Each new distribution of dots is logged to the console. The [Log effect](#log) is responsible for this.
 
-Try clicking several times in the same place without moving the mouse: you will see that the distribution of dots is printed only once. The state management part of the application is taking care of not sending the same state twice to the effects. We will see this later in more detail.
+Try clicking several times in the same place without moving the mouse: you will see that the distribution of dots is printed only once. The state management part of the application is taking care of not sending the same state twice to the effects. We will [see this later in more detail](#putting-it-all-together).
 
 ### 5. Click the `⎌` (undo) button
 
 ![undo](images/undo.gif)
 
-The point distribution goes back to the previous one. How this is achieved is an interesting part of the state manipulation and [state logic composition](#state-logic-composition) exploration.
+The point distribution goes back to the previous one. How this is achieved is an interesting part of the state manipulation and [state logic composition](#composing-the-state-management-logic-from-smaller-pieces) exploration.
 
 ### 6. Click the `✕` (reseed) button
 
@@ -116,25 +116,25 @@ Finally, open another browser window, go to [https://xaviervia.github.io/tessell
 
 The application logic is contained in the files placed directly under the `src` and the `src/reducers` folders.
 
-- `actions.js` contains the constant declarations for the action types. I'm trying out using Symbols for action types constants. Symbols make for great action types because each Symbol is totally unique, which means that collision between them is impossible. I took inspiration for this from [Keith Cirkel's Metaprogramming in ES6: Symbol's and why they're awesome](https://www.keithcirkel.co.uk/metaprogramming-in-es6-symbols/). Take this with a grain of salt: I haven't tried it outside Chrome or in a real life app.
+- [`actions.js`](src/actions.js) contains the constant declarations for the action types. I'm trying out using Symbols for action types constants. Symbols make for great action types because each Symbol is totally unique, which means that collision between them is impossible. I took inspiration for this from [Keith Cirkel's Metaprogramming in ES6: Symbol's and why they're awesome](https://www.keithcirkel.co.uk/metaprogramming-in-es6-symbols/). Take this with a grain of salt: I haven't tried it outside Chrome or in a real life app.
 
-- `index.html` is the HTML entry point. [Sagui](https://github.com/saguijs/sagui) will configure [Webpack](https://webpack.github.io/) to load it with the corresponding `index.js`.
+- [`index.html`](src/index.html) is the HTML entry point. [Sagui](https://github.com/saguijs/sagui) will configure [Webpack](https://webpack.github.io/) to load it with the corresponding `index.js`.
 
-- `index.js` is the JavaScript entry point. It's the only place where the effects meet the store, and the place where the application wiring is done. Note that, unlike in many other React applications, the `index.js` is _not in charge of rendering_: rendering the view is considered just another effect. Rendering is not part of the core of the application.
+- [`index.js`](src/index.js) is the JavaScript entry point. It's the only place where the effects meet the store, and the place where the application wiring is done. Note that, unlike in many other React applications, the `index.js` is _not in charge of rendering_: rendering the view is considered just another effect. Rendering is not part of the core of the application.
 
   > This doesn't mean that rendering is not _important_. As stated below, [effects are the whole point of an application](#effects). Saying that rendering is not part of the core means only that rendering is not state management logic.
 
-- `lenses.js` is the only file that is, to some extent, a **Ramda** artifact. Ramda provides this really cool functionality for selecting values in nested object structures that is done via [`lensPath`](http://ramdajs.com/docs/#lensPath) functions, which combined with [`view`](http://ramdajs.com/docs/#view) and [`set`](http://ramdajs.com/docs/#set) make for great ways of querying and immutably setting values in a complex state object. I still haven't decided what to do with this file.
+- [`lenses.js`](src/lenses.js) is the only file that is, to some extent, a **Ramda** artifact. Ramda provides this really cool functionality for selecting values in nested object structures that is done via [`lensPath`](http://ramdajs.com/docs/#lensPath) functions, which combined with [`view`](http://ramdajs.com/docs/#view) and [`set`](http://ramdajs.com/docs/#set) make for great ways of querying and immutably setting values in a complex state object. I still haven't decided what to do with this file.
 
-- `selectors.js` contains the functions that make it easy to query the state blob.
+- [`selectors.js`](src/selectors.js) contains the functions that make it easy to query the state blob.
 
-- `store.js` contains the initial state blob and the reducer, which is in turn built from all the high order reducers in `reducers/`.
+- [`store.js`](src/store.js) contains the initial state blob and the reducer, which is in turn built from all the high order reducers in `reducers/`.
 
-- `reducers/` contains files with each of the high order reducers.
+- [`reducers/`](src/reducers) contains files with each of the high order reducers.
 
 It's important to notice that, with the exception of `index.js`, _all of the above contain only pure functions_. There is nothing weird going on in them, and any complexity in the code is derived mostly from the complexity of the application functionality itself. I consider this one of the biggest achievements of this proposed architecture.
 
-> Note: the `reducers/debuggable.js` high order reducer is also not pure, but the intent of that reducer is just to introspect the state while in development, so it doesn't really count.
+> Note: the [`reducers/debuggable.js`](src/reducers/debuggable.js) high order reducer is also not pure, but the intent of that reducer is just to introspect the state while in development, so it doesn't really count.
 
 The whole application state is contained in a single object blob, Redux-style. Actually, the whole architecture is heavily inspired by Redux, but with two core differences:
 
@@ -142,14 +142,16 @@ The whole application state is contained in a single object blob, Redux-style. A
 - It is highly decoupled from the UI: Redux was originally meant to represent the data necessary to drive the UI, and the patterns that emerged around it reflect that intent. The thesis here is that the way Redux drives state can be used to manage any type of side effect, and for that purpose I introduced a generalized wiring interface that, the thesis goes, can be used for _any_ side effect.
 
 To emphasize the fact that the architecture is meant to be a generalization of Redux and not another Flux implementation (as in, another way of doing React), the nomenclature is slightly different:
+
 - `dispatch` is called `push` to represent the fact that the actual operation of dispatching an action is analogous to pushing into an array structure. As a matter of fact, it's pushing data into a stream that gets reduced on each addition – or `scan`ned in Flyd lingo.
+
 - There is no `getState`. State is pushed to the effects as an object each time the store gets updated.
 
 ### Composing the state management logic from smaller pieces
 
 Redux reducer composition is sometimes done with the [`combineReducers`](http://redux.js.org/docs/api/combineReducers.html) utility. `combineReducers` segments the state into several disconnected namespaces that the reducers target separately. In the past I had real problems with this approach though: long story short, keeping reducers from affecting each other lead us to manufacture artificial actions whose only purpose was to be able for some reducers to affect parts of the state outside their reach. I even [built a middleware for that](https://github.com/xaviervia/redux-walk). It was messy. I take it as a cautionary tale.
 
-The documentation itself warns about `combineReducers` [being just a convenience](http://redux.js.org/docs/api/combineReducers.html#tips). After we noticed that I tried exploring alternative ways of working with several reducers.
+The documentation itself warns us that `combineReducers` [is just a convenience](http://redux.js.org/docs/api/combineReducers.html#tips). We eventually noticed that, and since then I started exploring alternative ways of working with several reducers.
 
 I came to favor a different approach altogether:
 
@@ -185,7 +187,7 @@ const reducer = (state, action) => {
 }
 ```
 
-The advantages are plenty, but the main hidden one I discovered is that this means is very natural to make your high order reducers parametrizable, which means they can be _reusable_. In a silly example, let's say that you want to reuse the above shown _addition_ reducer, and in each specific application you want to use a different value for the action type and a different name for the property of the state that has to be affected. Then you could write your HOR (High Order Reducer) as follows:
+The advantages are plenty, but the main hidden one I discovered is that this means is very natural to make your high order reducers parametrizable, which means they can be _reusable_. In a silly example, let's say that you want to reuse the above shown _addition_ reducer, and in each specific application you want to use a different name for the action type and a different name for the property of the state that has to be affected. Then you could write your HOR (High Order Reducer) as follows:
 
 ```javascript
 const additionHighOrderReducer = (property, actionType) => (reducer) => (state, action) => {
@@ -206,14 +208,14 @@ The other obvious advantage is that a HOR can manipulate the result of another r
 
 ### The undoable high order reducer
 
-The following is the very simple implementation of the undoable HOR that can be found in `src/reducers/undoable.js`:
+The following is the very simple implementation of the adding support for the _undo_ operation with a high order reducer. It can be found in [`src/reducers/undoable.js`](src/reducers/undoable.js):
 
 ```javascript
-export default (actions) => (reducer) => (state, {type, payload}) => {
-  const {undo, ...restOfState} = state // eslint-disable-line no-unused-vars
+export default (actionType) => (reducer) => (state, {type, payload}) => {
+  const {undo, ...restOfState} = state
 
   switch (type) {
-    case actions.APP_UNDO:
+    case actionType:
       return state.undo
 
     default:
@@ -233,7 +235,7 @@ Notice how the `default` action is running the reducer that it received as an ar
 
 ### High order reducer composition
 
-The `undoable` demonstrate the kind of power that HORs bring, but of course not all HORs need to be meta: using HORs even when no meta operations are done is valuable because HORs can be composed together, while plain reducers can't. How would that look like?
+`undoable` demonstrates the kind of power that HORs bring, but of course not all HORs need to be meta: using HORs even when no meta operations are done is valuable because HORs can be composed together, while plain reducers can't. How would that look like?
 
 Well, simple enough:
 
@@ -251,21 +253,23 @@ Two important things to notice here:
 
   We could build the composition with a real reducer instead of using _identity_, but that would break the symmetry of the whole thing, since one of the parts of the application will not be a HOR.
 
-2. Since the _undo_ HOR intercepts the result of the other reducers, it needs to be the last element of the composition. Otherwise it would only operate in the identity function. Remember: `compose` works from right to left, so the above expression translates to:
+2. Since the `undoable` HOR intercepts the result of the other reducers, it needs to be the last element of the composition. Otherwise it would only operate on the identity function. Remember: `compose` works from right to left, so the above expression translates to:
 
   ```javascript
-  const reducer = undoHOR(APP_UNDO)(appHOR(pointsHOR((x) => x)))
+  const reducer = undoable(APP_UNDO)(appHOR(pointsHOR((x) => x)))
   ```
 
 > You can see a variation of this in `src/store.js`. The actual implementation is more complex because it requires the full action dictionary to be passed in to each high order reducer: but that's an implementation detail of which I'm not completely sure about.
 
-Any number of HORs can be chained in this way. Hopefully we can explore further if by adding more detailed configuration as to where in the state to do the modifications and what action names to respond to it becomes possible to have truly reusable application logic parts in the form of high order reducers.
+Any number of HORs can be chained in this way. Hopefully we can explore this further: it may be that, by adding configuration detailing what properties of that state tree the HORs should modify and what action types they should respond to, it becomes possible to have truly reusable pieces of application logic.
 
 ## Effects
 
 Now to the fun part.
 
-The application store can be seen as a _stream_. A stream gets updated continuously each time that something is pushed into each, and then it gets split into several streams that each land into a different effect. That is the conceptual picture: the actual implementation will vary. For example: while this schema is true for how Redux work, the Redux store is not an actual reactive stream, and even in this application the store stream is not literally split and sent down to the effects. But the analogy still holds.
+The application store can be seen as a _stream_, a stream that gets updated each time that something is pushed into it, and then gets split into several other streams that get finally sent down to the different side effects.
+
+That is the conceptual picture: the actual implementation will vary. For example: while this schema is a good analogy of how Redux works, the Redux store is not an actual reactive stream, and even in this application the store stream is not literally split and sent down to the effects. But the analogy still holds.
 
 > Here comes a semantic side note: I'm calling these _effects_ instead of _side effects_ because, as many pointed out, an application without side effects is just a way of transforming electricity into heat. _Effects_ is a correct name: the purpose of applications is in fact to perform effects. Side effects on the other hand refer to the _unintended consequences_ of performing an otherwise functional operation. In informal contexts I will use _effect_ and _side effect_ interchangeably, but I'll try to stick to _effects_ whenever nomenclature is important.
 
@@ -279,14 +283,13 @@ Effects come in different flavors:
 
 - **Bidirectional**: Effects that react to the state _and_ inject information back into it via actions. [LocalStorage](#localstorage-effect), [Seed](#seed-effect) and [View](#view-effect) are of this type.
 
-Notice that there is no implication whatsoever that incoming and outgoing effects need to be synchronous. As a matter of fact, incoming effects are like hardware interruptions: they are asynchronous and will come at an arbitrary time. This is how the architecture proposed here manages asynchronous operations: if the result of the operation is important to the application state, an asynchronous effect will capture some state change and perform some operation somewhere, only to push an action back into the state whenever (and if) the operation is completed. Notice that as far as the application state is concerned, the temporality between those two events is completely irrelevant.
+Notice that there is no implication whatsoever that incoming and outgoing effects need to be synchronous. As a matter of fact, incoming effects are like hardware interruptions: they come from the outside world at an arbitrary time. This is how the architecture proposed here manages asynchronous operations: if the result of the operation is important to the application state, an asynchronous effect will capture some state change and perform some operation somewhere, only to push an action back into the state whenever (and if) the operation is completed. Notice that as far as the application state is concerned, the temporality between those two events is completely irrelevant.
 
-> You can easily imagine constructing REST requests with this approach: say that an blog post was just submitted by the user: somewhere in the application state, there will be a sign that the REST communication effect will read and realize that a backend call needs to be performed: when that backend call is completed, it will push an action into the state signifying that the post was saved, or that a retry is necessary.
+> You can easily imagine constructing REST requests with this approach: say that a blog post was just submitted by the user: somewhere in the application state, there will be a sign that the REST communication effect will read and realize that a backend call needs to be performed: when that backend call is completed, it will push an action into the state signifying that the post was saved, or that a retry is necessary.
 >
 > But I digress.
 
-Categorizing the effects into these three types is not terribly useful: knowing if an effect is **Incoming**, **Outgoing** or **Bidirectional** doesn't say much about what it does. The reason I explain about it however is because it sheds some light into the _why_ of the Effect Wiring API.
-
+Categorizing the effects into these three types is not terribly useful: knowing if an effect is **Incoming**, **Outgoing** or **Bidirectional** doesn't say much about what it does. The reason I talk about it is because it sheds some light into why the Effect Wiring API looks like it does.
 
 ### Effect Wiring API
 
@@ -312,22 +315,25 @@ Another thing that you can do is to push an action when the application is being
 ```javascript
 import {RANDOM_VALUE} from 'actions'
 
-export default (push) => push({
-  type: RANDOM_VALUE,
-  payload: Math.random()
-})
+export default (push) => {
+  push({
+    type: RANDOM_VALUE,
+    payload: Math.random()
+  })
+}
 ```
 
 ### LocalStorage effect
 
 > [code](src/effects/localStorage.js)
 
-When first invoked, it checks if there is an entry in `localStorage` for `tessellation`, and if there is, it immediately pushes an action with the previously saved state. It also sets up a listener on the window `storage` event, and whenever said `tessellation` entry is updated it pushes another state override, thus keeping it in sync with whatever other instance of the application is running in a different window or tab (this will conspire with another effect and come back to bite us in one of the gotchas).
-
 ```javascript
 import {APP_SYNC} from 'actions'
 
 export default (push) => {
+  // Right after invocation, it checks if there is an entry in `localStorage`
+  // for `tessellation`, and if there is, it immediately pushes an action
+  // with the previously saved state.
   if (window.localStorage.getItem('tessellation')) {
     push({
       type: APP_SYNC,
@@ -335,17 +341,27 @@ export default (push) => {
     })
   }
 
-  window.addEventListener('storage', ({key, newValue}) => push({
-    type: APP_SYNC,
-    payload: JSON.parse(newValue)
-  }))
+  // It sets up a listener on the window `storage` event, and whenever the
+  // `tessellation` entry is updated it pushes another state override,
+  // thus keeping it in sync with whatever other instance of the
+  // application is running in a different window or tab.
+  window.addEventListener('storage', ({key, newValue}) => key === 'tessellation' &&
+    push({
+      type: APP_SYNC,
+      payload: JSON.parse(newValue)
+    })
+  )
 
+  // Whenever there is a new state, it serializes it and stores it
+  // in `localStorage`
   return (state) => window.localStorage.setItem(
     'tessellation',
     JSON.stringify(state.shared)
   )
 }
 ```
+
+The cross window/tab synchronization will conspire with another effect and come back to bite us in one of the gotchas.
 
 ### Log effect
 
@@ -364,7 +380,6 @@ const p = (index) => compose(
   point(index)
 )
 
-// Intentionally manual
 export default () => (state) => point(0)(state) &&
   console.log(
 `
@@ -380,12 +395,11 @@ export default () => (state) => point(0)(state) &&
 
 > [code](src/effects/resize.js)
 
-Listens to `resize` events on the window and pushes an action with the new value:
-
 ```javascript
 import {APP_RESIZE} from 'actions'
 
 export default (push) => {
+  // It immediately sets the size data
   push({
     type: APP_RESIZE,
     payload: {
@@ -394,6 +408,8 @@ export default (push) => {
     }
   })
 
+  // Sets up a listener so that each time that the window gets
+  // resized an action is pushed with the new window size value
   window.addEventListener('resize', () => push({
     type: APP_RESIZE,
     payload: {
@@ -432,7 +448,9 @@ export default (push) => (state) => state.shared.points.length === 0 &&
 
 > [code](src/effects/setup.js)
 
-When initialized, it immediately pushes an action with a newly generated UUID to identify the instance of the application. There is an interesting gotcha here: I initially modeled this as being part of the `initialState` object in the `store`, but you can see how that violates the purity of the store implementation. It's a common temptation to include "one off" effects in the creation of the `initialState`, but that is likely to create problems down the line. It's a good litmus test for the store implementation that no libraries with side effects are used in it.
+When initialized, it immediately pushes an action with a newly generated UUID to identify the instance of the application. There is an interesting gotcha here: I initially modeled this as being part of the `initialState` object in the `store`, but you can see how that violates the purity of the store implementation.
+
+It's a common temptation to perform "one off" side effects in the creation of the `initialState`, but doing that means that the initial state is no longer deterministic, which in turn is likely to create problems down the line. It's a good litmus test for the store implementation that no libraries with side effects are used within it.
 
 ```javascript
 import uuid from 'uuid'
@@ -483,7 +501,7 @@ class Container extends Component {
 return onState
 ```
 
-That is literally it. On `componentDidMount` the `onState` function is setup so that each time it is called by the application it will update the `storeData` within the Container state. React will realize if the state actually changed, and inside the `render` function it's just a matter of checking for the state being defined or not (which could easily be avoided by setting an initial state, but I didn't want to cater for that scenario) and then the whole store state is available, one deconstruction away, in `storeData`. Selectors can readily be reused to query that data.
+That is literally it. The `onState` function is defined on `componentDidMount`, and it's set up to update the `storeData` property of the Container state each time that the application calls it. React will realize if the state actually changed, and inside the `render` function it's just a matter of checking for the state being defined or not (which could easily be avoided by setting an initial state, but I didn't want to cater for that scenario) and then the whole store state is available, one deconstruction away, in `storeData`. Selectors can be readily used to query that data.
 
 For pushing information back into the state, this is what we do:
 
@@ -498,6 +516,10 @@ For pushing information back into the state, this is what we do:
 Again, nothing differs between this and how any other effect is wired.
 
 Other components that are not the container can (and should) be kept generic. Sending push or "untreated" chunks of the state down the React tree is a _nasty antipattern_, but this is also true when sending `dispatch` and/or `getState` in React Redux, so there is nothing new under the sun here.
+
+## Putting it all together
+
+TODO: Explain the index.js (any maybe clean it up)
 
 ## Debugging
 
@@ -514,7 +536,7 @@ There is a template for this in the `src/index.js`. If you want to try it out:
 3. `npm install`
 4. In your editor, open the `src/index.js` and uncomment lines `4` and `12`, as instructed. Comment out line `10`
 5. `npm start`
-6. Open http://localhost:3000
+6. Open [http://localhost:3000](http://localhost:3000)
 
 Extending this debugging tool should be rather straightforward.
 
@@ -529,11 +551,11 @@ The application has two bugs that were left there to demonstrate the kind of qui
 - **Symbols** make for pretty cool action types.
 - **High order reducers** open up a world of possibilities for reusable application state management functions.
 - The **streams** could be useful in the effects as well. The point here was to keep the API library agnostic and minimize the use of Flyd, but I'm pretty sure streams can help out a lot when dealing with more complex incoming side effects, while still keeping the wiring API agnostic.
-- **JSON Patch** diffs can be very useful for debugging and possibly for storing or sharing a log transformations. For example it could be useful to send the patches over a network to keep clients and servers synchronized.
+- **JSON Patch** diffs can be very useful for debugging and possibly for storing or sharing a log of transformations. For example it could be useful to send the patches over a network to keep clients and servers synchronized.
 
 ## Credits and references
 
-- [Redux](http://redux.js.org/) which "single reducer" idea heavily inspired this architecture.
+- [Redux](http://redux.js.org/) which's "single store" idea heavily inspired this architecture.
 - [@joaomilho](https://github.com/joaomilho) who originally gave me the idea of using [`flyd`](https://github.com/paldepind/flyd) to re implement the Redux store, and who's [Act framework](https://github.com/act-framework/act) and [Ion language](https://github.com/ion-lang/ion) motivated the wish to do more and more functional and reactive programming in JavaScript.
 - [@Nevon](https://github.com/Nevon)'s [demystifying Redux](https://gist.github.com/Nevon/eada09788b10b6a1a02949ec486dc3ce)
 
