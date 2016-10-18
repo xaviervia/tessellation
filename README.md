@@ -529,7 +529,23 @@ I'm glad you ask. Actually, you can't get exactly that. The tools and documentat
 
 However! It's pretty easy to get useful debug information about the evolution of the state in any architecture that uses reducers as the cornerstone of state management. In the reducers folder, there is `debuggable` HOR that can be used to decorate our reducer function and get more insights.
 
-There is a template for this in the `src/index.js`. If you want to try it out:
+The implementation of `debuggable` is also _very_ simple:
+
+```javascript
+import {diff} from 'jiff'
+
+export default (reducer) => (prevState, action) => {
+  const nextState = reducer(prevState, action)
+
+  console.log('action', action)
+  console.log('state', nextState)
+  console.log('diff', diff(prevState, nextState))
+
+  return nextState
+}
+```
+
+There are instructions for easily enabling this debugging in the `src/index.js`. If you want to try it out:
 
 1. `git clone git://github.com/xaviervia/tessellation`
 2. `cd tessellation`
@@ -544,7 +560,65 @@ Extending this debugging tool should be rather straightforward.
 
 The application has two bugs that were left there to demonstrate the kind of quirks that can emerge out of this architecture, and I will discuss here possible solutions.
 
-**TODO**
+### Reseed-then-undo bug
+
+![Seed-then-undo bug](images/seed-undo-bug.gif)
+
+Pay close attention at the tiles before the _Reseed_ button is pressed and the one right after pressing _Undo_ and you will notice that they are not the same.
+
+Let's enable the `debuggable` HOR and take a look at the action log for this operation:
+
+![Seed-then-undo log](images/seed-undo-log.png)
+
+As you can see, the `app/SEED` and `app/UNDO` are _not the only operations happening here_. What's going on?
+
+If we take a look at the [implementation of the _Reseed_ button](src/effects/view.js#L49):
+
+```javascript
+<Button
+  onClick={() => push({ type: POINTS_CLEANUP })}
+  title='reseed'>
+  ✕
+</Button>
+```
+
+We can see that it's not _actually_ telling the application to re seed. Instead, it's just cleaning up the current points. Turns out that the Seed effect will check the amount of points in the state and, finding that amount is zero, it will re populate with a new random set automatically.
+
+Implementing this felt clever. This was an honest-to-God bug that I introduced when originally building this application because I thought "hey, I already have the functionality for re seeding an empty set of points, what if for the reseed button I just _clear the state_ and leave that other effect do it's job?". In hindsight, I could have taken the _cleverness_ of the move as a warning sign, but on the hand reusing the effects is one of the motivations of building apps with this kind of architectures, so I wouldn't say that "never being clever" is a solution either.
+
+But I digress.
+
+How does the actual bug happen? Well, as you can see, being that the Reseed action does not actually _seed_ but rather _clears_ the points, it is only natural that the undo operation will simply undo the _seeding_, going back to the clean state with no points, which will, in turn, cause the Seed effect to send a freshly baked set of random points.
+
+#### How could this be solved?
+
+There are actually two different workable strategies for solving this issue. Each has it's merits, but I find the second one more intriguing because it introduces a very state centric way of thinking about the problem that would have prevented the clever move from being problematic at all (and I just mentioned, I think that kind of clever reusability is one of the potential benefits from this architecture).
+
+#### The helper way: extract the random point generator and reuse it in the Reseed handler
+
+##### The downside
+
+- A semantically relevant operation is lost into a not-really reusable helper (while reusable, it's not really useful as share code, because it's not a good abstraction, it's application specific)
+- The procedure for generating dots is actually application domain logic!
+
+##### The upside
+
+- Not a great one: this is more familiar, but if familiarity is our litmus test we shouldn't be trying a functional reactive approach and instead keep doing oop.
+
+#### The oxymoron way: make random deterministic - use the app window id as seed for randomness
+
+##### Use it in the APP_SEED reducer and keep the cleverness
+
+##### Use it in the APP_SEED reducer and call it directly from Reseed
+
+### Sync then reseed bug
+
+![Sync then reseed bug](images/sync-seed-bug.gif)
+
+This is of course a variation of the above mentioned bug, and the fixes are the same. Interesting to note are two things:
+
+- This bug it's a typical buggy scenario in applications that need synchronization: a race condition. In imperative architectures, _there is no elegant solution to these issues_. I can't stress this enough: all imperative solutions to these set of problems require some sort of "trusted" top-of-the-pyramid source of truth that all the others synchronized recognize, or distinct events to indicate that the stream of changes was terminated.
+- The first variation of the Oxymoron solution won't work to fix this problem, and that's why the second variation is necessary. Also note though that if we had implemented the APP_SEED with the Oxymoron approach right away there would have never been any need for the clever trick of clearing the state to let the Seed effect do its job: we could have triggered the APP_SEED action directly, without having to worry about how the random points were going to be created.
 
 ## My personal take aways
 
