@@ -1,7 +1,7 @@
 import {on, stream, scan} from 'flyd'
 import {mapObjIndexed} from 'ramda'
 import {initialState, reducer} from 'store'
-// import debuggable from 'decorators/debuggable'
+// import debuggable from 'reducers/debuggable'
 
 import * as effects from 'effects'
 
