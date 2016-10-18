@@ -361,7 +361,7 @@ export default (push) => {
 }
 ```
 
-The cross window/tab synchronization will conspire with another effect and come back to bite us in one of the gotchas.
+The cross window/tab synchronization will conspire with another effect and [come back to bite us in the gotchas](#gotchas-and-easter-eggs).
 
 ### Log effect
 

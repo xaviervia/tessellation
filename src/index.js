@@ -12,18 +12,35 @@ const store = scan(reducer, initialState, push)
 // const store = scan(debuggable(reducer), initialState, push)
 // Also import debuggable from 'decorators/debuggable'
 
-const effectsWithPush = mapObjIndexed((f) => f(push), effects)
-
-let prevState
-
-const update = (state) => {
-  if (prevState !== state) {
-    mapObjIndexed(
-      (f) => f instanceof Function && f(state),
-      effectsWithPush
-    )
-    prevState = state
+const forwarder = (prevState) => (effects) => (nextState) => {
+  if (prevState !== nextState) {
+    map((f) => f && f(nextState), effects)
   }
+
+  return forwarder(nextState)(effects)
 }
 
+const update = compose(
+  forwarder(),
+  map((f) => f(push),
+  values
+)(effects)
+
 on(update, store)
+
+// const effectsWithPush = mapObjIndexed((f) => f(push), effects)
+//
+// let prevState
+//
+//
+// const update = (state) => {
+//   if (prevState !== state) {
+//     mapObjIndexed(
+//       (f) => f instanceof Function && f(state),
+//       effectsWithPush
+//     )
+//     prevState = state
+//   }
+// }
+//
+// on(update, store)
