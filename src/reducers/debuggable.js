@@ -1,11 +1,11 @@
-import {changes, log} from 'lib/debug'
+import {diff} from 'jiff'
 
-export default (reducer) => (state, action) => {
-  const newState = reducer(state, action)
+export default (reducer) => (prevState, action) => {
+  const nextState = reducer(prevState, action)
 
-  log('action')(action)
-  log('state')(newState)
-  changes('diff')(state, newState)
+  console.log('action', action)
+  console.log('state', nextState)
+  console.log('diff', diff(prevState, nextState))
 
-  return newState
+  return nextState
 }
