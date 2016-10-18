@@ -8,10 +8,12 @@ export default (push) => {
     })
   }
 
-  window.addEventListener('storage', ({key, newValue}) => push({
-    type: APP_SYNC,
-    payload: JSON.parse(newValue)
-  }))
+  window.addEventListener('storage', ({key, newValue}) => key === 'tessellation' &&
+    push({
+      type: APP_SYNC,
+      payload: JSON.parse(newValue)
+    })
+  )
 
   return (state) => window.localStorage.setItem(
     'tessellation',
