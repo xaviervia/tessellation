@@ -132,7 +132,7 @@ The application logic is contained in the files placed directly under the `src` 
 
 - [`reducers/`](src/reducers) contains files with each of the high order reducers.
 
-It's important to notice that, with the exception of `index.js`, _all of the above contain only pure functions_. There is nothing weird going on in them, and any complexity in the code is derived mostly from the complexity of the application functionality itself. I consider this one of the biggest achievements of this proposed architecture.
+It's important to notice that, with the exception of `index.js`, **all of the above contain only pure functions**. There is nothing weird going on in them, and any complexity in the code is derived mostly from the complexity of the application functionality itself. I consider this one of the biggest achievements of this proposed architecture.
 
 > Note: the [`reducers/debuggable.js`](src/reducers/debuggable.js) high order reducer is also not pure, but the intent of that reducer is just to introspect the state while in development, so it doesn't really count.
 
