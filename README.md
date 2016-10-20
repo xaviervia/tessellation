@@ -136,12 +136,12 @@ It's important to notice that, with the exception of `index.js`, _all of the abo
 
 > Note: the [`reducers/debuggable.js`](src/reducers/debuggable.js) high order reducer is also not pure, but the intent of that reducer is just to introspect the state while in development, so it doesn't really count.
 
-The whole application state is contained in a single object blob, Redux-style. Actually, the whole architecture is heavily inspired by Redux, but with two core differences:
+The whole application state is contained in a single object blob, Redux style. Actually, the whole architecture is heavily inspired by Redux––with two differences:
 
 - To prove that the "single object" state approach goes beyond libraries and it's easily reproducible with any reactive programming library, it's not using Redux itself.
 - It is highly decoupled from the UI: Redux was originally meant to represent the data necessary to drive the UI, and the patterns that emerged around it reflect that intent. The thesis here is that the way Redux drives state can be used to manage any type of side effect, and for that purpose I introduced a generalized wiring interface that, the thesis goes, can be used for _any_ side effect.
 
-To emphasize the fact that the architecture is meant to be a generalization of Redux and not another Flux implementation (as in, another way of doing React), the nomenclature is slightly different:
+To emphasize the fact that the architecture is meant to be a generalization of Redux and not another Flux implementation––as in, another way of doing React––the nomenclature is slightly different:
 
 - `dispatch` is called `push` to represent the fact that the actual operation of dispatching an action is analogous to pushing into an array structure. As a matter of fact, it's pushing data into a stream that gets reduced on each addition – or `scan`ned in Flyd lingo.
 
@@ -157,7 +157,7 @@ I came to favor a different approach altogether:
 
 ## High order reducers
 
-In this project I wanted to explore a pattern for composition of reducers that I first saw presented in React Europe for [undoing](https://github.com/omnidan/redux-undo): high order reducers. In a nutshell, that means that instead of implementing your most basic reducer as:
+In this project I wanted to explore composition of reducers using a pattern that I saw presented in React Europe for [undoing](https://github.com/omnidan/redux-undo): high order reducers. In a nutshell, it means that instead of implementing your most basic reducer as:
 
 ```javascript
 const reducer = (state, action) => {
@@ -187,7 +187,7 @@ const reducer = (state, action) => {
 }
 ```
 
-The advantages are plenty, but the main hidden one I discovered is that this means is very natural to make your high order reducers parametrizable, which means they can be _reusable_. In a silly example, let's say that you want to reuse the above shown _addition_ reducer, and in each specific application you want to use a different name for the action type and a different name for the property of the state that has to be affected. Then you could write your HOR (High Order Reducer) as follows:
+The advantages are plenty, but the main hidden one I found is that is very natural to make your high order reducers parametrizable, which means they can be _reusable_. In a silly example, let's say that you want to reuse the above shown _addition_ reducer, and in each specific application you want to use a different name for the action type and a different name for the property of the state that has to be affected. Then you could write your HOR (High Order Reducer) as follows:
 
 ```javascript
 const additionHighOrderReducer = (property, actionType) => (reducer) => (state, action) => {
@@ -204,7 +204,7 @@ const additionHighOrderReducer = (property, actionType) => (reducer) => (state, 
 }
 ```
 
-The other obvious advantage is that a HOR can manipulate the result of another reducer, introducing the intriguing possibility of performing meta-actions in the state.
+The other obvious advantage is that a HOR can manipulate the result of another reducer, introducing the intriguing possibility of performing meta actions on the state.
 
 ### The undoable high order reducer
 
@@ -231,13 +231,13 @@ export default (actionType) => (reducer) => (state, {type, payload}) => {
 }
 ```
 
-Notice how the `default` action is running the reducer that it received as an argument and checking if it's result differs from the previous state. In case it is different, it will not just return the new state: it will also add an `undo` property to the new state with a reference to the old state. To actually perform the _undoing_, it's as simple as returning `state.undo`.
+Notice how the `default` action runs the reducer that it received as an argument and checks if the result differs from the previous state. In case it is different, it will not just return the new state: it will also add an `undo` property to the new state––with a reference to the old state. To perform the undo operation, it's as simple as returning `state.undo`.
 
 ### High order reducer composition
 
-`undoable` demonstrates the kind of power that HORs bring, but of course not all HORs need to be meta: using HORs even when no meta operations are done is valuable because HORs can be composed together, while plain reducers can't. How would that look like?
+`undoable` demonstrates the kind of power that HORs bring, but of course not all HORs need to be meta: HORs are valuable because you can chain them into a single reducer. You can't do this with plain reducers. 
 
-Well, simple enough:
+How would that composition look like? Well, simple enough:
 
 ```javascript
 const reducer = compose(
@@ -247,11 +247,11 @@ const reducer = compose(
 )((x) => x)
 ```
 
-Two important things to notice here:
+Note that:
 
-1. To get an actual reducer out of a HOR, you need to call it with another reducer. The simplest possible reducer is the _identity function_: that is, the function that returns whatever argument it gets. Think about it: a reducer that gets a state and returns that same state is still a reducer.
+1. Keep in mind that to get an actual reducer out of a HOR, you need to call it with another reducer. The simplest possible reducer is the **identity function**––that is, the function that returns whatever argument it gets. Think about it: a reducer that gets a state and returns that same state is still a reducer.
 
-  We could build the composition with a real reducer instead of using _identity_, but that would break the symmetry of the whole thing, since one of the parts of the application will not be a HOR.
+  We could build the composition with an useful reducer instead of using identity, but that would break the symmetry of the whole thing, since one of the parts of the application will not be a HOR.
 
 2. Since the `undoable` HOR intercepts the result of the other reducers, it needs to be the last element of the composition. Otherwise it would only operate on the identity function. Remember: `compose` works from right to left, so the above expression translates to:
 
