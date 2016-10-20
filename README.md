@@ -293,7 +293,7 @@ Categorizing the effects into these three types is not terribly useful: knowing 
 
 ### Effect Wiring API
 
-Effects are wired to the store with a simple API: each effect is a function with the signature (in [Flowtype annotations](https://flowtype.org/)):
+Effects are wired to the store with a simple API: each effect is a function with the signature––in [Flowtype annotations](https://flowtype.org/):
 
 ```javascript
 type FluxAction = {
@@ -594,7 +594,7 @@ How does the actual bug happen? Well, as you can see, being that the Reseed acti
 
 #### How could this be solved?
 
-There are actually two different workable strategies for solving this issue. Each has it's merits, but I find the second one more intriguing because it introduces a very state centric way of thinking about the problem that would have prevented the clever move from being problematic at all (and I just mentioned, I think that kind of clever reusability is one of the potential benefits from this architecture).
+There are actually two different workable strategies for solving this issue. Each has it's merits, but I find the second one more intriguing because it introduces a very state centric way of thinking about the problem that would have prevented the clever move from being problematic at all––and I just mentioned, I think that kind of clever reusability is one of the potential benefits from this architecture.
 
 #### The helper way: extract the random point generator and reuse it in the Reseed handler
 
