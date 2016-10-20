@@ -82,7 +82,7 @@ The tessellation changes it's proportions to fit the new window size. Each time 
 
 One dot is removed, and another dot is added in roughly the position where you clicked.
 
-> It will be placed _roughly_ where the mouse was because positions are normalized from whatever size your window is to a 100x100 grid, so the application's grid doesn't match the pixels that you see. This action is sent from the [View effect](#view) – which is a React component.
+> It will be placed _roughly_ where the mouse was because positions are normalized from whatever size your window is to a 100x100 grid, so the application's grid doesn't match the pixels that you see. This action is sent from the [View effect](#view)––which is a React component.
 
 ### 4. Open the console and click around
 
@@ -171,7 +171,7 @@ const reducer = (state, action) => {
 }
 ```
 
-...you take another reducer as the first argument and pass it through when you are not interested in the current action:
+…you take another reducer as the first argument and pass it through when you are not interested in the current action:
 
 ```diff
 - const reducer = (state, action) => {
