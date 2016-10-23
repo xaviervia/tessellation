@@ -530,7 +530,7 @@ The keystone to that makes this convergence possible is one of the crucial chall
 
 ### The store
 
-Interestingly enough, the Redux approach of a stateful store that exposes a dispatch function and makes a new state available once the update function (reducer) is ran is completely analogous to a reactive programming stream. A stream is an object to which you can push data and then do all sort of operations over, such as mapping, reducing, etc. The Redux **dispatch** function is just the original stream, while the **getState** function is just the stream that you get after running reduce on **dispatch**.
+Interestingly enough, the Redux approach of a stateful store that exposes a `dispatch` function and makes a new state available once the update function (reducer) is ran is completely analogous to a reactive programming stream. A stream is an object to which you can push data and then do all sort of operations over, such as mapping, reducing, etc. The Redux **dispatch** function is just the original stream, while the **getState** function is just the stream that you get after running reduce on **dispatch**.
 
 This is exactly what we will do. Let’s take a look at the store implementation from the index, using [Flyd](https://github.com/paldepind/flyd):
 
