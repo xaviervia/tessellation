@@ -652,7 +652,7 @@ export default (push) => (state) => state.shared.points.length === 0 &&
   })
 ```
 
-…and extract the number generation as a helper:
+…extract the number generation as a helper:
 
 ```diff
 -import {map, range} from 'ramda'
@@ -697,7 +697,7 @@ This is not a great upside. If we take familiarity as a litmus test for good arc
 
 I’d love to call this one, “The ironic way”. The idea is to:
 
-> Make randomness deterministic, and complete the seed operation in the reducer for **APP_SEE**
+> Make randomness deterministic, and complete the seed operation in the reducer for **APP_SEED**
 
 This sounds crazy. The point of randomness is that is not deterministic. Well, not quite.
 
