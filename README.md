@@ -547,7 +547,7 @@ You can read more about Flyd in the [documentation](https://github.com/paldepind
 
 ### Wiring the effects
 
-Now we need to wire the effects, that are exposed following the [Effect Wiring API](#effect-wiring-api). Conceptually, what we want to do is to start up by invoking all effects with the **push** function, then store the resulting listeners and subscribe to the store stream so that each time that the store is updated, all the listeners are called with it.
+Now we need to wire the effects, that are exposed following the [Effect Wiring API](#effect-wiring-api). Conceptually, what we want to do is to start up by invoking all effects with the **push** function, then store the resulting listeners and subscribe to the store stream so that each time that a new state is available, all the listeners are called with it.
 
 Flyd API's is unfortunately not extremely pretty here, which means that the result will not be too concise. Let’s explore the rest of the `index.js` code together:
 
