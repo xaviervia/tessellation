@@ -596,7 +596,7 @@ What went wrong? Let's enable the `debuggable` HOR and take a look at the action
 
 ![Seed-then-undo log](images/seed-undo-log.png)
 
-As you can see, the **app/SEED** and **app/UNDO** are not the only operations happening. What's going on?
+As you can see, the **app/SEED** and **app/UNDO** are not the only operations happening. Why?
 
 If we take a look at the [implementation of the **Reseed** button](src/effects/view.js#L49):
 
@@ -608,52 +608,225 @@ If we take a look at the [implementation of the **Reseed** button](src/effects/v
 </Button>
 ```
 
-…we can see that it's not **actually** telling the application to reseed. Instead, it's just cleaning up the current points. Turns out that the Seed effect will check the amount of points in the state and, finding that amount is zero, it will re populate with a new random set automatically.
+…we can see that it's not **actually** telling the application to reseed. Instead, it's just removing the current points from the state. Turns out that the Seed effect will check the amount of points in the state and, finding that amount is zero, it will repopulate with a random set automatically.
 
-Implementing this felt clever. This was an honest-to-God bug that I introduced when originally building this application because I thought:
+When I implemented the Reseed button action as just an invocation of the **POINTS_CLEANUP** action, I felt clever. I thought:
 
 “Hey, I already have the functionality for re seeding an empty set of points, what if for the reseed button I just **clear the state** and leave that other effect do it's job?”
+
+This was an honest-to-God bug that I introduced when originally building this application, because I couldn’t foresee any issues with cleaning up instead of reseeding directly, and I didn’t want to reimplement the random number generation or extract it out from the Seed effect.
 
 > I could have taken the **cleverness** of the move as a warning sign––on the other hand, reusing the effects is one of the motivations for the writing apps with these kind of architectures. so I wouldn't say that “never being clever" is a solution either.
 >
 > But I digress.
 
-How does the bug happen? Well, as you can see, being that the Reseed action does not actually **seed** but rather **clears** the points, it is only natural that the undo operation will simply undo the **seeding**, going back to the clean state with no points. This will, in turn, cause the Seed effect to activate and send a freshly baked set of random points back.
+How does the bug happen? Well, as you can see, being that the Reseed button does not actually **seed** but rather **clears** the points, it is only natural that the undo operation will simply undo the **seeding**, going back to the clean state with no points. This will, in turn, cause the Seed effect to activate and send a freshly baked set of random points again.
 
-#### How could this be solved?
+How could this be solved?
 
-There are two different workable strategies for solving this issue. Each has its merits, but I find the second one more intriguing: it introduces a very state centric way of thinking about the problem. A way of thinking that would have prevented the clever move from being problematic in the first place.
+I can come up with two different strategies for solving this issue. Each has its own merits, but I find the second one more intriguing: it introduces a very state-centric way of thinking about the problem. A way of thinking that would have prevented the clever move from being problematic in the first place.
 
 #### The helper way
 
-> “Extract the random point generator and reuse it in the Reseed handler.”
+> “Extract the random point generator and reuse it in the Reseed button action handler.”
 
-##### The downside
+A very obvious solution would be to go to the [`effects/seed.js`](src/effects/seed.js) file:
 
-- A semantically relevant operation is lost into a nonreusable helper (while reusable, it's not really useful as share code, because it's not a good abstraction, it's application specific)
-- The procedure for generating dots is actually application domain logic!
+```javascript
+import {map, range} from 'ramda'
+import {APP_SEED} from 'actions'
 
-##### The upside
+const {floor, random} = Math
 
-- Not a great one: this is more familiar, but if familiarity is our litmus test we shouldn't be trying a functional reactive approach and instead keep doing oop.
+// This effect needs to be loaded last
+// to avoid colliding with any state recovered from localStorage
+export default (push) => (state) => state.shared.points.length === 0 &&
+  push({
+    type: APP_SEED,
+    payload: map(
+      () => [floor(random() * 100), floor(random() * 100)],
+      range(0, 9)
+    )
+  })
+```
 
-#### The oxymoron way
+…and extract the number generation as a helper:
 
-> Make random deterministic; use the application's window id as seed for randomness
+```diff
+-import {map, range} from 'ramda'
++import getRandomizedPoints from 'lib/getRandomizedPoints'
+import {APP_SEED} from 'actions'
 
-##### Use it in the APP_SEED reducer and keep the cleverness
+-const {floor, random} = Math
 
-##### Use it in the APP_SEED reducer and call it directly from Reseed
+// This effect needs to be loaded last
+// to avoid colliding with any state recovered from localStorage
+export default (push) => (state) => state.shared.points.length === 0 &&
+  push({
+    type: APP_SEED,
+-    payload: map(
+-      () => [floor(random() * 100), floor(random() * 100)],
+-      range(0, 9)
+-    )
++    payload: getRandomizedPoints()
+  })
+```
+
+…and reuse that helper in the Reseed button:
+
+```diff
+<Button
+-  onClick={() => push({ type: POINTS_CLEANUP })}
++  onClick={() => push({
++    type: APP_SEED, payload: getRandomizedPoints()
++  })}
+  title='reseed'>
+  ✕
+</Button>
+```
+
+The **downside**: a relevant part of the application’s functionality gets lost by being converted into a snowflake helper. While the `getRandomizedPoints` function is reusable in principle, it's unlikely to be useful in any other application. It is not a good abstraction: it's application specific logic hidden away as a helper.
+
+The **upside**: this way of refactoring is familiar. [It's a close analog of Extract Method](http://refactoring.com/catalog/extractMethod.html).
+
+This is not a great upside. If we take familiarity as a litmus test for good architecture, we shouldn't be trying a functional-reactive approach, we should just stick with whatever we were doing before.
+
+#### The state way
+
+I'd love to call this one, “The ironic way”. The idea is to:
+
+> Make randomness deterministic, and complete the seed operation in the reducer for **APP_SEE**
+
+This sounds crazy. The point of randomness is that is not deterministic. Well, not quite.
+
+The point of randomness is that you can't predict it. Determinism is a different matter, and according to your worldview [randomness might not exist or be embedded in everything](https://en.wikipedia.org/wiki/Bohr%E2%80%93Einstein_debates); entropy however **does exist** from an statistical point of view, and it’s what we use to get values that we can’t predict in otherwise predictable systems.
+
+I’ll try not to digress to much, but an important component of [(pseudo)randomness in computer software is mathematical functions](https://en.wikipedia.org/wiki/Pseudorandom_number_generator) that return values between 0 and 1 so that, for any `𝑓(x)`, `𝑓(x + 1)` is not easily predictable. Moreover, if you were to plot a vast amount of values of the pseudo-random number generation function you would not find any discernible pattern, nor be able to extract any statistical clustering of values around a specific number. That is in an ideal world; in reality there are only worse or better approximations.
+
+> While I don’t want to abound in this topic, it is worth noting that unpredictability is a core subject of the work around architectures built to operate with asynchronous interactions with the outside world.
+
+Either way, a pseudo-random number generation function is not random per se: if you send the same sequence of `x`s to it, you get the same values of `𝑓(x)`. This proves useful in real life, since to test the behavior of a program you might want to bombard it with random numbers, but if it fails, you will want to reproduce the random sequence used to see what went wrong. Many pseudo-random number generation libraries provide functions that can be invoked with arbitrary values and will then return **another function** which will produce a sequence of pseudo-random numbers; in these libraries, calling the “factory function” with the same value will result in a set of functions that will produce the same sequence of numbers, every time. This is called **seeding** a pseudo-random number sequence.
+
+Well, turns out that if we could just do that: add a random seed and a counter in the state, then invoke the function the same seed and the counter value to get a pseudo-random number out of it. To get the initial seed (if there is none available from localStorage) we can reuse the application’s window id that we create for the **APP_SETUP**.
+
+First we need a seedable random number generation library. Unfortunately JavaScript doesn’t come with one (`Math.random` is not seedable) but since we are not trying to come up with a trustworthy entropy source that can be used in security or in casinos, we can make do with (a variation of) [Antti Sykäry’s post in Stack Overflow](http://stackoverflow.com/a/19303725/5801727):
+
+```javascript
+// New file: src/lib/seedableRandom.js
+const {floor, sin} = Math
+export default (seed) => (counter) => {
+  const x = sin(seed + counter) * 10000
+  return x - floor(x)
+}
+```
+
+Then in the `reducers/app.js`:
+
+```diff
+import {set} from 'ramda'
+
+import * as lenses from 'lenses'
++import seedableRandom from 'lib/seedableRandom'
+
+export default (actions) => (reducer) => (state, {type, payload}) => {
+  switch (type) {
+    case actions.APP_RESIZE:
+      return set(
+        lenses.size,
+        payload,
+        state
+      )
+
+    case actions.APP_SEED:
+-      return set(
+-        lenses.points,
+-        payload,
+-        state
+-      )
++      return {
++        ...state,
++        shared: {
++          ...state.shared,
++          // `18` is the amount of numbers that we will use,
++          // two numbers for each dot.
++          counter: (state.shared.counter || 0) + 18,
++          points: map(
++            (index) => [
++              floor(
++                seedableRandom(
++                  state.shared.seed,
++                  state.shared.counter + (index * 2)
++                ) * 100
++              ),
++              floor(
++                seedableRandom(
++                  state.shared.seed,
++                  state.shared.counter + (index * 2) + 1
++                ) * 100
++              )
++            ],
++            range(0, 9)
++          )
++        }
++      }
+
+    case actions.APP_SETUP:
+-      return set(
+-        lenses.id,
+-        payload.id,
+-        state
+-      )
++      return {
++        ...state,
++        local: {
++          ...state.local,
++          id: payload.id
++        },
++        shared: state.shared.seed
++          ? state.shared
++          : {
++            ...state.shared,
++            seed: payload.id,
++            counter: 0
++          }
++      }
+
+    case actions.APP_SYNC:
+      return {
+        ...state,
+        shared: payload
+      }
+
+    default:
+      return reducer(state, {type, payload})
+  }
+}
+```
+
+There is some repetition that could be refactored out, but if we were to do that now we can do it as a high order reducer instead of a helper.
+
+The **downsize**: it requires us to understand how pseudo-random number generation works and why `Math.random` is not good enough. This is partially a downsize though: learning this is actually pretty useful.
+
+The **upside**: this approach is far more powerful than the helper one. By moving the logic upstream from the effect to the state, we got the actual generation embedded in the application update function, which means that now any effect can use it.
+
+“But the number generation became coupled with the reducer! Isn’t it better to have it in a decoupled helper!” you say. Yes and no. We can extract a helper to decouple the specific point generation, but it would have to have a signature that allows for it to be used from the reducer. But the fact that is being done in a reducer is absolutely correct. It’s application logic, so it should be part of the state update function one way or another.
+
+Sometimes, decoupling just means **coupling with the right thing**.
 
 ### “Sync then reseed” bug
 
+This bug is a variation of the previous one. The fix is the same, because the underlying problem is the same. Why mentioning it at all?
+
+1. This variation of the bug illustrates a race condition: a is typical buggy scenario for applications that synchronize data. While **undo** is a fairly rare feature to support in web applications, synchronization is commonplace. Synchronization issues are more confusing and far harder to debug, so I preferred explaining the issue and the solution with the more discrete manifestation in the “Reseed then undo” form.
+2. It illustrates something unrelated but interesting anyway: when things go wild in terms of synchronization, the behavior of applications can be affected by unassuming things such as whether or not the mouse pointer is on top of them. Take a look at the animation carefully (or try it yourself): you will notice that the window where the mouse is being hovered changes slower than the other one. My hypothesis is that the presence of a hovering mouse causes extra computations to be done in the window, effectively slowing down it’s JavaScript thread.
+3. It’s kind of pretty.
+
 ![Sync then reseed bug](images/sync-seed-bug.gif)
 
-This is of course a variation of the above mentioned bug, and the fix for it is the same. Interesting to note are two things:
+> The downsize is, even with a reasonable architecture, asynchronous operations are hard. The best we can hope for––at least for now––is to have an architecture that makes it easy to find and solve the issues arising from them.
+>
+> In imperative architectures, **there are no elegant solution to these issues**. I can't stress this enough: all imperative solutions to this set of problems require some sort of “trusted”, top-of-the-pyramid source of truth that all the nodes recognize as authoritative, or an extra set of events created specifically to indicate that the stream of changes is terminated.
 
-- This bug is a typical for applications that synchronize data: a race condition. In imperative architectures, **there are no elegant solution to these issues**. I can't stress this enough: all imperative solutions to this set of problems require some sort of “trusted”, top-of-the-pyramid source of truth that all the nodes recognize as authoritative, or an extra set of events created especifically to indicate that the stream of changes is terminated.
-
-- The first variation of the Oxymoron solution won't work to fix this problem, and that's why the second variation is necessary. Also note though that if we had implemented the APP_SEED with the Oxymoron approach right away there would have never been any need for the clever trick of clearing the state to let the Seed effect do its job: we could have triggered the APP_SEED action directly, without having to worry about how the random points were going to be created.
 
 ## My personal takeaways
 
