@@ -83,7 +83,7 @@ The tessellation changes it's proportions to fit the new window size. Each time 
 
 One dot is removed, and another dot is added in roughly the position where you clicked.
 
-> It will be placed _roughly_ where the mouse was because positions are normalized from whatever size your window is to a 100x100 grid, so the application's grid doesn't match the pixels that you see. This action is sent from the [View effect](#view) – which is a React component.
+> It will be placed _roughly_ where the mouse was because positions are normalized from whatever size your window is to a 100x100 grid, so the application's grid doesn't match the pixels that you see. This action is sent from the [View effect](#view)––which is a React component.
 
 ### 4. Open the console and click around
 
@@ -133,16 +133,16 @@ The application logic is contained in the files placed directly under the `src` 
 
 - [`reducers/`](src/reducers) contains files with each of the high order reducers.
 
-It's important to notice that, with the exception of `index.js`, _all of the above contain only pure functions_. There is nothing weird going on in them, and any complexity in the code is derived mostly from the complexity of the application functionality itself. I consider this one of the biggest achievements of this proposed architecture.
+It's important to notice that, with the exception of `index.js`, **all of the above contain only pure functions**. There is nothing weird going on in them, and any complexity in the code is derived mostly from the complexity of the application functionality itself. I consider this one of the biggest achievements of this proposed architecture.
 
-> Note: the [`reducers/debuggable.js`](src/reducers/debuggable.js) high order reducer is also not pure, but the intent of that reducer is just to introspect the state while in development, so it doesn't really count.
+> The [`debuggable`](src/reducers/debuggable.js) high order reducer is not pure, but the intent of that function is just to introspect the state while in development, so it doesn't really count.
 
-The whole application state is contained in a single object blob, Redux-style. Actually, the whole architecture is heavily inspired by Redux, but with two core differences:
+The whole application state is contained in a single object blob, Redux style. Actually, the whole architecture is heavily inspired by Redux––with two differences:
 
-- To prove that the "single object" state approach goes beyond libraries and it's easily reproducible with any reactive programming library, it's not using Redux itself.
-- It is highly decoupled from the UI: Redux was originally meant to represent the data necessary to drive the UI, and the patterns that emerged around it reflect that intent. The thesis here is that the way Redux drives state can be used to manage any type of side effect, and for that purpose I introduced a generalized wiring interface that, the thesis goes, can be used for _any_ side effect.
+- To prove that the "single object" state approach trascends libraries and it's easily reproducible with any reactive programming library, Tessellation is not using Redux itself.
+- Tesselation's store is highly decoupled from the UI: Redux was originally meant to represent the data necessary to drive the UI, and the patterns that emerged around it reflect that intent. The thesis here is that the way Redux drives state can be used to manage any type of side effect, and for that purpose I introduced a generalized wiring interface that––so the argument goes––can be used for **any** side effect.
 
-To emphasize the fact that the architecture is meant to be a generalization of Redux and not another Flux implementation (as in, another way of doing React), the nomenclature is slightly different:
+To emphasize that the architecture is meant to be a generalization of Redux and not another Flux implementation––as in, another way of doing React––the nomenclature is slightly different:
 
 - `dispatch` is called `push` to represent the fact that the actual operation of dispatching an action is analogous to pushing into an array structure. As a matter of fact, it's pushing data into a stream that gets reduced on each addition – or `scan`ned in Flyd lingo.
 
@@ -150,15 +150,15 @@ To emphasize the fact that the architecture is meant to be a generalization of R
 
 ### Composing the state management logic from smaller pieces
 
-Redux reducer composition is sometimes done with the [`combineReducers`](http://redux.js.org/docs/api/combineReducers.html) utility. `combineReducers` segments the state into several disconnected namespaces that the reducers target separately. In the past I had real problems with this approach though: long story short, keeping reducers from affecting each other lead us to manufacture artificial actions whose only purpose was to be able for some reducers to affect parts of the state outside their reach. I even [built a middleware for that](https://github.com/xaviervia/redux-walk). It was messy. I take it as a cautionary tale.
+Redux reducer composition is sometimes done with the [`combineReducers`](http://redux.js.org/docs/api/combineReducers.html) utility. `combineReducers` segments the state into several disconnected namespaces that the reducers target separately. In the past I had real problems with this approach: long story short, keeping reducers from affecting each other lead me and my colleagues to manufacture artificial actions whose only purpose was allow some reducers to affect parts of the state outside their namespace. I even [built a middleware for that](https://github.com/xaviervia/redux-walk). It was messy. I take it as a cautionary tale.
 
-The documentation itself warns us that `combineReducers` [is just a convenience](http://redux.js.org/docs/api/combineReducers.html#tips). We eventually noticed that, and since then I started exploring alternative ways of working with several reducers.
+The documentation itself warns us that `combineReducers` [is just a convenience](http://redux.js.org/docs/api/combineReducers.html#tips). Me and my colleagues eventually noticed that, and since then I explored alternative ways of working with several reducers.
 
-I came to favor a different approach altogether:
+I came to favor a very different approach:
 
 ## High order reducers
 
-In this project I wanted to explore a pattern for composition of reducers that I first saw presented in React Europe for [undoing](https://github.com/omnidan/redux-undo): high order reducers. In a nutshell, that means that instead of implementing your most basic reducer as:
+In this project I wanted to explore composition of reducers using a pattern that I saw presented in React Europe for [undoing](https://github.com/omnidan/redux-undo): high order reducers. In a nutshell, it means that instead of implementing your most basic reducer as:
 
 ```javascript
 const reducer = (state, action) => {
@@ -172,7 +172,7 @@ const reducer = (state, action) => {
 }
 ```
 
-...you take another reducer as the first argument and pass it through when you are not interested in the current action:
+…you take another reducer as the first argument and pass it through when you are not interested in the current action:
 
 ```diff
 - const reducer = (state, action) => {
@@ -188,7 +188,7 @@ const reducer = (state, action) => {
 }
 ```
 
-The advantages are plenty, but the main hidden one I discovered is that this means is very natural to make your high order reducers parametrizable, which means they can be _reusable_. In a silly example, let's say that you want to reuse the above shown _addition_ reducer, and in each specific application you want to use a different name for the action type and a different name for the property of the state that has to be affected. Then you could write your HOR (High Order Reducer) as follows:
+The advantages are plenty, but the main hidden one I found is that is very natural to make your high order reducers parametrizable, which means they can be _reusable_. In a silly example, let's say that you want to reuse the above shown _addition_ reducer, and in each specific application you want to use a different name for the action type and a different name for the property of the state that has to be affected. Then you could write your HOR (High Order Reducer) as follows:
 
 ```javascript
 const additionHighOrderReducer = (property, actionType) => (reducer) => (state, action) => {
@@ -205,7 +205,7 @@ const additionHighOrderReducer = (property, actionType) => (reducer) => (state, 
 }
 ```
 
-The other obvious advantage is that a HOR can manipulate the result of another reducer, introducing the intriguing possibility of performing meta-actions in the state.
+The other obvious advantage is that a HOR can manipulate the result of another reducer, introducing the intriguing possibility of performing meta actions on the state.
 
 ### The undoable high order reducer
 
@@ -232,13 +232,13 @@ export default (actionType) => (reducer) => (state, {type, payload}) => {
 }
 ```
 
-Notice how the `default` action is running the reducer that it received as an argument and checking if it's result differs from the previous state. In case it is different, it will not just return the new state: it will also add an `undo` property to the new state with a reference to the old state. To actually perform the _undoing_, it's as simple as returning `state.undo`.
+Notice how the `default` action runs the reducer that it received as an argument and checks if the result differs from the previous state. In case it is different, it will not just return the new state: it will also add an `undo` property to the new state––with a reference to the old state. To perform the undo operation, it's as simple as returning `state.undo`.
 
 ### High order reducer composition
 
-`undoable` demonstrates the kind of power that HORs bring, but of course not all HORs need to be meta: using HORs even when no meta operations are done is valuable because HORs can be composed together, while plain reducers can't. How would that look like?
+`undoable` demonstrates the kind of power that HORs bring, but of course not all HORs need to be meta: HORs are valuable because you can chain them into a single reducer. You can't do this with plain reducers. 
 
-Well, simple enough:
+How would that composition look like? Well, simple enough:
 
 ```javascript
 const reducer = compose(
@@ -248,11 +248,11 @@ const reducer = compose(
 )((x) => x)
 ```
 
-Two important things to notice here:
+Note that:
 
-1. To get an actual reducer out of a HOR, you need to call it with another reducer. The simplest possible reducer is the _identity function_: that is, the function that returns whatever argument it gets. Think about it: a reducer that gets a state and returns that same state is still a reducer.
+1. Keep in mind that to get an actual reducer out of a HOR, you need to call it with another reducer. The simplest possible reducer is the **identity function**––that is, the function that returns whatever argument it gets. Think about it: a reducer that gets a state and returns that same state is still a reducer.
 
-  We could build the composition with a real reducer instead of using _identity_, but that would break the symmetry of the whole thing, since one of the parts of the application will not be a HOR.
+  We could build the composition with an useful reducer instead of using identity, but that would break the symmetry of the whole thing, since one of the parts of the application will not be a HOR.
 
 2. Since the `undoable` HOR intercepts the result of the other reducers, it needs to be the last element of the composition. Otherwise it would only operate on the identity function. Remember: `compose` works from right to left, so the above expression translates to:
 
@@ -294,7 +294,7 @@ Categorizing the effects into these three types is not terribly useful: knowing 
 
 ### Effect Wiring API
 
-Effects are wired to the store with a simple API: each effect is a function with the signature (in [Flowtype annotations](https://flowtype.org/)):
+Effects are wired to the store with a simple API: each effect is a function with the signature––in [Flowtype annotations](https://flowtype.org/):
 
 ```javascript
 type FluxAction = {
@@ -617,7 +617,7 @@ How does the actual bug happen? Well, as you can see, being that the Reseed acti
 
 #### How could this be solved?
 
-There are actually two different workable strategies for solving this issue. Each has it's merits, but I find the second one more intriguing because it introduces a very state centric way of thinking about the problem that would have prevented the clever move from being problematic at all (and I just mentioned, I think that kind of clever reusability is one of the potential benefits from this architecture).
+There are actually two different workable strategies for solving this issue. Each has it's merits, but I find the second one more intriguing because it introduces a very state centric way of thinking about the problem that would have prevented the clever move from being problematic at all––and I just mentioned, I think that kind of clever reusability is one of the potential benefits from this architecture.
 
 #### The helper way: extract the random point generator and reuse it in the Reseed handler
 
