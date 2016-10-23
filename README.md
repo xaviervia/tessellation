@@ -591,7 +591,7 @@ on(
 
 We added the imports for all the effects and for some functions from Ramda that we are going to need. The interesting part starts with `const effects …`: we gather all our effects into an array, so that we can operate with them in bulk. Because they are exposed with the Effect Wiring API, we can treat them all the same way, and because they are independent from one another, we don’t care about what order they are called.
 
-The `deduplicatedStore` is an artifact of Flyd: even when the new state is exactly the same object as the previous one, the stream will call all of it’s subscribers. There is a `filter` function in Flyd but I couldn’t make it work for this scenario, so instead I implemented the `deduplicatedStore` stream so that it will only be called when the state is really different.
+The `deduplicatedStore` is an artifact of Flyd––even when the new state is exactly the same object as the previous one, the stream will call all of it’s subscribers. There is a `filter` function in Flyd but I couldn’t make it work for this scenario, so instead I implemented the `deduplicatedStore` stream so that it will only be called when the state is really different.
 
 For the update function, we first map over all the effects and initialize them with the **push** stream: because the effects follow the wiring API, this will return an array of listener functions and undefined values. Some effects––bidirectional and outgoing effects––will return a function, the listener, while effects not interested in the state––incoming effects––will return `undefined`. We need to filter those out, and we do with `filter((listener) => listener != null)`. We get a list of listeners as a result.
 
