@@ -618,7 +618,7 @@ When I implemented the Reseed button action as just an invocation of the **POINT
 
 This was an honest-to-God bug that I introduced when originally building this application, because I couldn’t foresee any issues with cleaning up instead of reseeding directly, and I didn’t want to reimplement the random number generation or extract it out from the Seed effect.
 
-> I could have taken the **cleverness** of the move as a warning sign––on the other hand, reusing the effects is one of the motivations for the writing apps with these kind of architectures. so I wouldn’t say that “never being clever" is a solution either.
+> I could have taken the **cleverness** of the move as a warning sign––on the other hand, reusing the effects is one of the motivations for writing apps with these kind of architectures. so I wouldn’t say that “never being clever" is a solution either.
 >
 > But I digress.
 
