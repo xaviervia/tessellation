@@ -1,16 +1,19 @@
 import {on, stream, scan} from 'flyd'
-import {mapObjIndexed} from 'ramda'
+import {compose, map} from 'ramda'
 import {initialState, reducer} from 'store'
-// import debuggable from 'reducers/debuggable'
 
-import * as effects from 'effects'
+import localStorage from 'effects/localStorage'
+import log from 'effects/log'
+import resize from 'effects/resize'
+import seed from 'effects/seed'
+import setup from 'effects/setup'
+import view from 'effects/view'
 
 const push = stream()
 
 const store = scan(reducer, initialState, push)
-// To debug actions and state, comment the previous line and uncomment:
-// const store = scan(debuggable(reducer), initialState, push)
-// Also import debuggable from 'decorators/debuggable'
+
+const effects = [localStorage, log, resize, seed, setup, view]
 
 const forwarder = (prevState) => (effects) => (nextState) => {
   if (prevState !== nextState) {
@@ -22,25 +25,7 @@ const forwarder = (prevState) => (effects) => (nextState) => {
 
 const update = compose(
   forwarder(),
-  map((f) => f(push),
-  values
+  map((f) => f(push)),
 )(effects)
 
 on(update, store)
-
-// const effectsWithPush = mapObjIndexed((f) => f(push), effects)
-//
-// let prevState
-//
-//
-// const update = (state) => {
-//   if (prevState !== state) {
-//     mapObjIndexed(
-//       (f) => f instanceof Function && f(state),
-//       effectsWithPush
-//     )
-//     prevState = state
-//   }
-// }
-//
-// on(update, store)
