@@ -25,6 +25,7 @@ This project is a thesis on how to build front end applications.
 - [Core application logic](#core-application-logic)
 - [High order reducers](#high-order-reducers)
 - [Effects](#effects) – the [Effect Wiring API](#effect-wiring-api) is of special importance.
+- [Putting it all together](#putting-it-all-together)
 - [Debugging](#debugging)
 - [Libraries](#libraries)
 - [Gotchas and easter eggs](#gotchas-and-easter-eggs)
