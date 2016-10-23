@@ -524,7 +524,7 @@ Other components that are not the container can (and should) be kept generic. Se
 
 Now that we have all our effects and state logic in place, let’s wire them together.
 
-A word of caution: this is the most library-opinionated piece of the Tessellation code. There is a good reason for it: the `index.js` where this wiring up happens is the point of convergence of the functional and the reactive universes. On the one side you have the purely functional code that doesn’t deal with operations and instead only declares operations and state transformations without actually doing any of them. On the other side you have the effects, which can make all kind of asynchronous and nondeterministic operations happen, and exposed through a uniform reactive friendly interface. The keystone to that convergence is one of the crucial challenges to be solved.
+A word of caution: this is the most library-opinionated piece of the Tessellation code. There is a good reason for it: the `index.js` where this wiring up happens is the point of convergence of the functional and the reactive universes. On the one side you have the purely functional code that doesn’t deal with operations and instead only declares possible actions and state transformations without actually doing any of them. On the other side you have the effects, which can make all kind of asynchronous and nondeterministic operations happen, and exposed through a uniform reactive friendly interface. The keystone to that convergence is one of the crucial challenges to be solved.
 
 ### The store
 
