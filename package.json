@@ -7,7 +7,7 @@
     "type": "git"
   },
   "author": "Fernando Vía Canel <fernando.via@gmail.com>",
-  "license": "The Unlicense",
+  "license": "Unlicense",
   "scripts": {
     "build": "sagui build",
     "develop": "sagui develop --port 3000",
