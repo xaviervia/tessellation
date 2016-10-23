@@ -595,7 +595,7 @@ The `deduplicatedStore` is an artifact of Flyd––even when the new state is e
 
 For the update function, we first map over all the effects and initialize them with the **push** stream: because the effects follow the wiring API, this will return an array of listener functions and undefined values. Some effects––bidirectional and outgoing effects––will return a function, the listener, while effects not interested in the state––incoming effects––will return `undefined`. We need to filter those out, and we do with `filter((listener) => listener != null)`. We get a list of listeners as a result.
 
-In the last line, we subscribe a function to the deduplicatedStore stream, and this function will take the state and call each the listeners with it. Easy. We could totally use `map` instead of `on`, but using `on` renders visible that we expect **side effects** to happen in the listeners and are not interested in their return values.
+In the last lines, we subscribe a function to the deduplicatedStore stream, and this function will take the state and call each the listeners with it. Easy. We could totally use `map` instead of `on`, but using `on` renders visible that we expect **side effects** to happen in the listeners and are not interested in their return values.
 
 That’s all there is to it. Note that if the wiring API would force effects to always return a listener function, it will be even simpler:
 
