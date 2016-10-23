@@ -10,7 +10,28 @@ This project is a thesis on how to build front end applications.
 
 **Tessellation** is a simple but not trivial application that keeps a set of points in the state and renders them as a [Voronoi tessellation](https://en.wikipedia.org/wiki/Voronoi_diagram) with a little help from [d3](https://d3js.org/) and [React](https://facebook.github.io/react/).
 
-## Features
+## Contents
+
+- [Features of the demonstration application](#features-of-the-demonstration-application)
+- [Principles](#principles)
+- [Let's get stated](#lets-get-started)
+  1. [Reloading](#reload-the-application)
+  2. [Resizing](#resize-the-window)
+  3. [Clicking around](#click-around)
+  4. [Checking the console](#open-the-console-and-click-around)
+  5. [Undoing](#click-the-undo-button)
+  6. [Reseeding](#click-the-reseed-button)
+  7. [Synchronization](#see-two-windows-synchronized)
+- [Core application logic](#core-application-logic)
+- [High order reducers](#high-order-reducers)
+- [Effects](#effects) –– the [Effect Wiring API](#effect-wiring-api) if of special importance.
+- [Debugging](#debugging)
+- [Libraries](#libraries)
+- [Gotchas and easter eggs](#gotchas-and-easter-eggs)
+- [Credits and references](#credits-and-references)
+- [License](#license)
+
+## Features of the demonstration application
 
 - Saves automatically to local storage.
 - Synchronizes across browser tabs/windows.
