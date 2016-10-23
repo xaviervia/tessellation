@@ -84,7 +84,7 @@ The tessellation changes it’s proportions to fit the new window size. Each tim
 
 One dot is removed, and another dot is added in roughly the position where you clicked.
 
-> It will be placed _roughly_ where the mouse was because positions are normalized from whatever size your window is to a 100x100 grid, so the application’s grid doesn’t match the pixels that you see. This action is sent from the [View effect](#view)––which is a React component.
+> It will be placed **roughly** where the mouse was because positions are normalized from whatever size your window is to a 100x100 grid, so the application’s grid doesn’t match the pixels that you see. This action is sent from the [View effect](#view)––which is a React component.
 
 ### 4. Open the console and click around
 
@@ -122,9 +122,9 @@ The application logic is contained in the files placed directly under the `src` 
 
 - [`index.html`](src/index.html) is the HTML entry point. [Sagui](https://github.com/saguijs/sagui) will configure [Webpack](https://webpack.github.io/) to load it with the corresponding `index.js`.
 
-- [`index.js`](src/index.js) is the JavaScript entry point. It’s the only place where the effects meet the store, and the place where the application wiring is done. Note that, unlike in many other React applications, the `index.js` is _not in charge of rendering_: rendering the view is considered just another effect. Rendering is not part of the core of the application.
+- [`index.js`](src/index.js) is the JavaScript entry point. It’s the only place where the effects meet the store, and the place where the application wiring is done. Note that, unlike in many other React applications, the `index.js` is **not in charge of rendering**: rendering the view is considered just another effect. Rendering is not part of the core of the application.
 
-  > This doesn’t mean that rendering is not _important_. As stated below, [effects are the whole point of an application](#effects). Saying that rendering is not part of the core means only that rendering is not state management logic.
+  > This doesn’t mean that rendering is not **important**. As stated below, [effects are the whole point of an application](#effects). Saying that rendering is not part of the core means only that rendering is not state management logic.
 
 - [`lenses.js`](src/lenses.js) is the only file that is, to some extent, a **Ramda** artifact. Ramda provides this really cool functionality for selecting values in nested object structures that is done via [`lensPath`](http://ramdajs.com/docs/#lensPath) functions, which combined with [`view`](http://ramdajs.com/docs/#view) and [`set`](http://ramdajs.com/docs/#set) make for great ways of querying and immutably setting values in a complex state object. I still haven’t decided what to do with this file.
 
@@ -283,7 +283,7 @@ Effects come in different flavors:
 
 - **Outgoing**: Effects that react to the new state by performing some operation, but never inject anything back. [Log](#log-effect) is an Outgoing Effect.
 
-- **Bidirectional**: Effects that react to the state _and_ inject information back into it via actions. [LocalStorage](#localstorage-effect), [Seed](#seed-effect) and [View](#view-effect) are of this type.
+- **Bidirectional**: Effects that react to the state **and** inject information back into it via actions. [LocalStorage](#localstorage-effect), [Seed](#seed-effect) and [View](#view-effect) are of this type.
 
 Notice that there is no implication whatsoever that incoming and outgoing effects need to be synchronous. As a matter of fact, incoming effects are like hardware interruptions: they come from the outside world at an arbitrary time. This is how the architecture proposed here manages asynchronous operations: if the result of the operation is important to the application state, an asynchronous effect will capture some state change and perform some operation somewhere, only to push an action back into the state whenever (and if) the operation is completed. Notice that as far as the application state is concerned, the temporality between those two events is completely irrelevant.
 
@@ -533,7 +533,7 @@ I’m glad you ask. Actually, you can’t get exactly that. The tools and docume
 
 However! It’s pretty easy to get useful debug information about the evolution of the state in any architecture that uses reducers as the cornerstone of state management. In the reducers folder, there is `debuggable` HOR that can be used to decorate our reducer function and get more insights.
 
-The implementation of `debuggable` is also _very_ simple:
+The implementation of `debuggable` is simple:
 
 ```javascript
 import {diff} from 'jiff'
@@ -701,17 +701,17 @@ I’d love to call this one, “The ironic way”. The idea is to:
 
 This sounds crazy. The point of randomness is that is not deterministic. Well, not quite.
 
-The point of randomness is that you can’t predict it. Determinism is a different matter, and according to your worldview [randomness might not exist or be embedded in everything](https://en.wikipedia.org/wiki/Bohr%E2%80%93Einstein_debates); entropy however **does exist** from an statistical point of view, and it’s what we use to get values that we can’t predict in otherwise predictable systems.
+The point of randomness is that you can’t predict it. Determinism is a different matter, and according to your worldview [randomness might not exist or be embedded in everything](https://en.wikipedia.org/wiki/Bohr%E2%80%93Einstein_debates); entropy however **does exist** from a statistical point of view, and it’s what we use to get values that we can’t predict in otherwise predictable systems.
 
-I’ll try not to digress to much, but an important component of [(pseudo)randomness in computer software is mathematical functions](https://en.wikipedia.org/wiki/Pseudorandom_number_generator) that return values between 0 and 1 so that, for any `𝑓(x)`, `𝑓(x + 1)` is not easily predictable. Moreover, if you were to plot a vast amount of values of the pseudo-random number generation function you would not find any discernible pattern, nor be able to extract any statistical clustering of values around a specific number. That is in an ideal world; in reality there are only worse or better approximations.
+I’ll try not to digress too much, but an important component of [(pseudo)randomness in computer software is mathematical functions](https://en.wikipedia.org/wiki/Pseudorandom_number_generator) that return values between 0 and 1 so that, for any `𝑓(x)`, `𝑓(x + 1)` is not easily predictable. Moreover, if you were to plot a vast amount of values of the pseudo-random number generation function you would not find any discernible pattern, nor be able to extract any statistical clustering of values around a specific number. That is in an ideal world; in reality there are only worse or better approximations.
 
 > While I don’t want to abound in this topic, it is worth noting that unpredictability is a core subject of the work around architectures built to operate with asynchronous interactions with the outside world.
 
-Either way, a pseudo-random number generation function is not random per se: if you send the same sequence of `x`s to it, you get the same values of `𝑓(x)`. This proves useful in real life, since to test the behavior of a program you might want to bombard it with random numbers, but if it fails, you will want to reproduce the random sequence used to see what went wrong. Many pseudo-random number generation libraries provide functions that can be invoked with arbitrary values and will then return **another function** which will produce a sequence of pseudo-random numbers; in these libraries, calling the “factory function” with the same value will result in a set of functions that will produce the same sequence of numbers, every time. This is called **seeding** a pseudo-random number sequence.
+Either way, a pseudo-random number generation function is not random per se: if you send the same sequence of `x`s to it, you get the same values of `𝑓(x)`. This proves useful in real life, since to test the behavior of a program you might want to bombard it with random numbers, but if it fails, you will want to reproduce the random sequence to see what went wrong. Many pseudo-random number generation libraries provide functions that can be invoked with arbitrary values and will then return **another function** which will produce a sequence of pseudo-random numbers; in these libraries, calling the “factory function” with the same value will result in a set of functions that will produce the same sequence of numbers, every time. This is called **seeding** a pseudo-random number sequence.
 
-Well, turns out that if we could just do that: add a random seed and a counter in the state, then invoke the function the same seed and the counter value to get a pseudo-random number out of it. To get the initial seed (if there is none available from localStorage) we can reuse the application’s window id that we create for the **APP_SETUP**.
+Well, we could just do that: add a seed and a counter in the state, then invoke the function with the same seed and the counter value to get a pseudo-random number out of it. To get the initial seed––if there is none available from localStorage––we can reuse the application’s window id that we create for the **APP_SETUP**.
 
-First we need a seedable random number generation library. Unfortunately JavaScript doesn’t come with one (`Math.random` is not seedable) but since we are not trying to come up with a trustworthy entropy source that can be used in security or in casinos, we can make do with (a variation of) [Antti Sykäry’s post in Stack Overflow](http://stackoverflow.com/a/19303725/5801727):
+First we need a seedable random number generation library. Unfortunately JavaScript doesn’t come with one––`Math.random` is not seedable. Since we are not trying to come up with a trustworthy randomness generation function that can be used in security or in casinos, we can make do with (a variation of) [Antti Sykäry’s answer in Stack Overflow](http://stackoverflow.com/a/19303725/5801727):
 
 ```javascript
 // New file: src/lib/seedableRandom.js
@@ -807,19 +807,19 @@ export default (actions) => (reducer) => (state, {type, payload}) => {
 
 There is some repetition that could be refactored out, but if we were to do that now we can do it as a high order reducer instead of a helper.
 
-The **downsize**: it requires us to understand how pseudo-random number generation works and why `Math.random` is not good enough. This is partially a downsize though: learning this is actually pretty useful.
+The **downsize**: it requires us to understand how pseudo-random number generation works and why `Math.random` is not good enough. This is only partially a downsize though: learning this is actually pretty useful.
 
 The **upside**: this approach is far more powerful than the helper one. By moving the logic upstream from the effect to the state, we got the actual generation embedded in the application update function, which means that now any effect can use it.
 
-“But the number generation became coupled with the reducer! Isn’t it better to have it in a decoupled helper!” you say. Yes and no. We can extract a helper to decouple the specific point generation, but it would have to have a signature that allows for it to be used from the reducer. But the fact that is being done in a reducer is absolutely correct. It’s application logic, so it should be part of the state update function one way or another.
+“But the number generation became coupled with the reducer! Isn’t it better to have it in a decoupled helper!” you say. Yes and no. The fact is that is being done in a reducer is absolutely correct. It’s application logic, so it should be part of the state update function one way or another. We can still extract a helper for the point generation, but it will have a completely different signature from the `getRandomizedPoints` helper.
 
 Sometimes, decoupling just means **coupling with the right thing**.
 
 > Note that rewriting a nondeterministic operation to be deterministic is a staple of the functional way. Functional programming is completely deterministic and cannot handle (side)effects happening inside it’s wiring: to be able to perform nondeterministic operations, functional programming puts these operations in safe containers called [monads](https://drboolean.gitbooks.io/mostly-adequate-guide/content/ch9.html). The result is that effects are pushed out, away from the main logic.
 >
-> In a way, the whole architecture presented here aims at reproducing the success and idea behind monads, but using a reactive programming interface to make it easier to understand, since purely functional programming code is highly abstract, very formalized and consequently hard to follow.
+> In a way, the whole architecture presented here aims at reproducing the success of the monads, but using a reactive programming interface to make it easier to understand, since purely functional programming code is highly abstract, very formalized and consequently hard to follow.
 >
-> A fault I often see in purely functional code is idioms taking the spotlight and making the application purpose harder and harder to discern below them: this refers to [Cheng Lou’s React Europe talk](https://www.youtube.com/watch?v=mVVNJKv9esE) about solving the problems in the right level of abstraction.
+> A fault I often see in purely functional code is arcane idioms taking the spotlight and making the application purpose harder and harder to discern below them: this refers to [Cheng Lou’s React Europe talk](https://www.youtube.com/watch?v=mVVNJKv9esE) about solving the problems in the right level of abstraction.
 >
 > My point of view is that the purely functional approach abstracts way too high. My hope is that this approach hits closer to the sweet spot.
 
@@ -827,15 +827,13 @@ Sometimes, decoupling just means **coupling with the right thing**.
 
 This bug is a variation of the previous one. The fix is the same, because the underlying problem is the same. Why mentioning it at all?
 
-1. This variation of the bug illustrates a race condition: a is typical buggy scenario for applications that synchronize data. While **undo** is a fairly rare feature to support in web applications, synchronization is commonplace. Synchronization issues are more confusing and far harder to debug, so I preferred explaining the issue and the solution with the more discrete manifestation in the “Reseed then undo” form.
-2. It illustrates something unrelated but interesting anyway: when things go wild in terms of synchronization, the behavior of applications can be affected by unassuming things such as whether or not the mouse pointer is on top of them. Take a look at the animation carefully (or try it yourself): you will notice that the window where the mouse is being hovered changes slower than the other one. My hypothesis is that the presence of a hovering mouse causes extra computations to be done in the window, effectively slowing down it’s JavaScript thread.
+1. This variation of the bug illustrates a race condition: a typical buggy scenario for applications that synchronize data. While **undo** is a fairly rare feature to support in web applications, synchronization is commonplace. Synchronization issues are more confusing and far harder to debug, so I preferred explaining the issue and the solution with the more discrete manifestation in the “Reseed then undo” form.
+2. It illustrates something unrelated but interesting anyway: when things go wild in terms of synchronization, the behavior of applications can be affected by unassuming things such as whether or not the mouse pointer is on top of them. Take a look at the animation carefully (or try it yourself): you will notice that the window where the mouse is being hovered changes slower than the other one. My hypothesis is that the presence of a hovering mouse causes extra computations to be done in the window, effectively slowing down its JavaScript thread.
 3. It’s kind of pretty.
 
 ![Sync then reseed bug](images/sync-seed-bug.gif)
 
-> The downsize is, even with a reasonable architecture, asynchronous operations are hard. The best we can hope for––at least for now––is to have an architecture that makes it easy to find and solve the issues arising from them.
->
-> In imperative architectures, **there are no elegant solution to these issues**. I can’t stress this enough: all imperative solutions to this set of problems require some sort of “trusted”, top-of-the-pyramid source of truth that all the nodes recognize as authoritative, or an extra set of events created specifically to indicate that the stream of changes is terminated.
+> In imperative architectures, **there are no elegant solution to these issues**. I can’t stress this enough: all imperative solutions to this set of problems require some sort of “trusted”, top-of-the-pyramid source of truth that all the nodes recognize as authoritative, or an extra set of events created specifically to indicate that the stream of changes is terminated, which will usually provide no guarantees anyway.
 
 
 ## My personal takeaways
