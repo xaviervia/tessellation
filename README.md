@@ -110,9 +110,9 @@ A new random distribution of dots appears.
 
 ![sync](images/sync.gif)
 
-Finally, open another browser window, go to [https://xaviervia.github.io/tessellation/](https://xaviervia.github.io/tessellation/), put it side by side with the current one, and click around in one and the other: you would see that both update at the same time, completely synchronized. This is also done by the [LocalStorage effect](#localstorage)
+Open another browser window, go to [https://xaviervia.github.io/tessellation/](https://xaviervia.github.io/tessellation/), put it side by side with the current one, and click around in one and the other: you would see that both update at the same time, completely synchronized. This is also done by the [LocalStorage effect](#localstorage)
 
-> There is a bug caused by a race condition that you can trigger having the windows side by side. We will discuss it later, but see if you can find it if you want.
+> With the windows side by side, there is a bug in the application that is fairly easy to reproduce. It was left there on purpose; [we will discuss it later](#sync-then-reseed-bug), but you can try to find it and guess what’s causing it if you want.
 
 ## Core application logic
 
