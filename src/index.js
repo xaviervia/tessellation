@@ -1,6 +1,7 @@
 import {on, stream, scan} from 'flyd'
-import {compose, map} from 'ramda'
 import {initialState, reducer} from 'store'
+
+import {compose, filter, map} from 'ramda'
 
 import localStorage from 'effects/localStorage'
 import log from 'effects/log'
@@ -15,17 +16,20 @@ const store = scan(reducer, initialState, push)
 
 const effects = [localStorage, log, resize, seed, setup, view]
 
-const forwarder = (prevState) => (effects) => (nextState) => {
-  if (prevState !== nextState) {
-    map((f) => f && f(nextState), effects)
-  }
+const deduplicatedStore = stream()
 
-  return forwarder(nextState)(effects)
-}
+let prevState
+on((nextState) => {
+  prevState !== nextState && deduplicatedStore(nextState)
+  prevState = nextState
+}, store)
 
-const update = compose(
-  forwarder(),
-  map((f) => f(push)),
+const listeners = compose(
+  filter((listener) => listener != null),
+  map((effect) => effect(push)),
 )(effects)
 
-on(update, store)
+on(
+  (state) => listeners.forEach((listener) => listener(state)),
+  deduplicatedStore
+)

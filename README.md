@@ -521,9 +521,99 @@ Other components that are not the container can (and should) be kept generic. Se
 
 ## Putting it all together
 
-aka recreating Redux in three lines of Flyd code.
-TODO: Explain the index.js (any maybe clean it up)
+Now that we have all our effects and state logic in place, let’s wire them together.
 
+A word of caution: this is the most library-opinionated piece of the Tessellation code. There is a good reason for it: the `index.js` where this wiring up happens is the point of convergence of the functional and the reactive universes. On the one side you have the purely functional code that doesn’t deal with operations and instead only declares operations and state transformations without actually doing any of them. On the other side you have the effects, which can make all kind of asynchronous and nondeterministic operations happen, and exposed through a uniform reactive friendly interface. The keystone to that convergence is one of the crucial challenges to be solved.
+
+### The store
+
+Interestingly enough, the Redux approach of a stateful store that exposes a dispatch function and makes a new state available once the update function (reducer) is ran is completely analogous to a reactive programming stream. A stream is an object to which you can push data and then do all sort of operations over, such as mapping, reducing, etc. The Redux **dispatch** function is just the original stream, while the **getState** function is just the stream that you get after running reduce on **dispatch**.
+
+This is exactly what we will do. Let’s take a look at the store implementation from the index, using [Flyd](https://github.com/paldepind/flyd):
+
+```javascript
+import {on, stream, scan} from 'flyd'
+import {initialState, reducer} from 'store'
+
+const push = stream()
+
+const store = scan(reducer, initialState, push)
+```
+
+You can read more about Flyd in the [documentation](https://github.com/paldepind/flyd#creating-streams), but the gist of it is that a Flyd stream is a function that if you call without arguments returns the last value that was put into it, and if you call it with arguments you push a value. It also implements `map` and many other array functions; and those functions return a new stream. In the above case, `scan` is just reduce: it calls the argument function for every value, in order, and passes down the previous accumulated value and the new one. It also takes an initial value for the accumulation. This exactly what the Redux store is: a reducer over the many actions that happened in the application.
+
+### Wiring the effects
+
+Now we need to wire the effects, that are exposed following the [Effect Wirign API](#effect-wiring-api). Conceptually, what we want to do is to start up by invoking all effects with the **push** function, storing the resulting listeners and subscribe to the store stream so that each time that the store is updated, all the listeners are called with it.
+
+Flyd API's is unfortunately not extremely pretty here, which means that the result will not be too concise. Let’s explore the rest of the `index.js` code together:
+
+```javascript
+import {on, stream, scan} from 'flyd'
+import {initialState, reducer} from 'store'
+
+import {compose, filter, map} from 'ramda'
+
+import localStorage from 'effects/localStorage'
+import log from 'effects/log'
+import resize from 'effects/resize'
+import seed from 'effects/seed'
+import setup from 'effects/setup'
+import view from 'effects/view'
+
+const push = stream()
+
+const store = scan(reducer, initialState, push)
+
+const effects = [localStorage, log, resize, seed, setup, view]
+
+const deduplicatedStore = stream()
+
+let prevState
+on((nextState) => {
+  prevState !== nextState && deduplicatedStore(nextState)
+  prevState = nextState
+}, store)
+
+const listeners = compose(
+  filter((listener) => listener != null),
+  map((effect) => effect(push)),
+)(effects)
+
+on(
+  (state) => listeners.forEach((listener) => listener(state)),
+  deduplicatedStore
+)
+```
+
+We added the imports for all the effects and for some functions from Ramda that we are going to need. The interesting part starts with `const effects …`: we gather all our effects into an array, so that we can operate with them in bulk. Because they are exposed with the Effect Wiring API, we can treat them all the same way, and because they are independent from one another, we don’t care about what order they are called.
+
+The `deduplicatedStore` is an artifact of Flyd: even when the new state is exactly the same object as the previous one, the stream will call all of it’s subscribers. There is a `filter` function in Flyd but I couldn’t make it work for this scenario, so instead I implemented the `deduplicatedStore` stream so that it will only be called when the state is really different.
+
+For the update function, we first map over all the effects and initialize them with the **push** stream: because the effects follow the wiring API, this will return an array of listener functions and undefined values. Some effects––bidirectional and outgoing effects––will return a function, the listener, while effects not interested in the state––incoming effects––will return `undefined`. We need to filter those out, and we do with `filter((listener) => listener != null)`. We get a list of listeners as a result.
+
+In the last line, we subscribe a function to the deduplicatedStore stream, and this function will take the state and call each the listeners with it. Easy. We could totally use `map` instead of `on`, but using `on` renders visible that we expect **side effects** to happen in the listeners and are not interested in their return values.
+
+That’s all there is to it. Note that if the wiring API would force effects to always return a listener function, it will be even simpler:
+
+```diff
+-const listeners = compose(
+-  filter((listener) => listener != null),
+-  map((effect) => effect(push)),
+-)(effects)
++const listeners = map(
++  (effect) => effect(push),
++  effects
++)
+```
+
+…and if Flyd would have a deduplication function out of the box, we would be able to even remove the `deduplicatedStore`.
+
+We implemented all the wiring in a very small amount of code. It’s a good thing: our `index.js` is almost entirely generic (we could have an `effects/index.js` and import all effects in one statement to make it completely generic) and that means that our `index.js` is boilerplate. Boilerplate should be kept small.
+
+> If all the operations in `index.js` are generic, can I get it as a function instead of writing boilerplate? Well, most certainly we could write such function, but I meant to demonstrate how simple the integration is without any magic, and also to prove a point of how the same integration can be done with multiple libraries. If this architecture is successful, such library should most certainly be published.
+
+// TODO: Link Redux example
 
 ## Debugging
 
