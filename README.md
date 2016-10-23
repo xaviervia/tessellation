@@ -593,9 +593,9 @@ We added the imports for all the effects and for some functions from Ramda that 
 
 The `deduplicatedStore` is an artifact of Flyd––even when the new state is exactly the same object as the previous one, the stream will call all of it’s subscribers. There is a `filter` function in Flyd but I couldn’t make it work for this scenario, so instead I implemented the `deduplicatedStore` stream so that it will only be called when the state is really different.
 
-For the update function, we first map over all the effects and initialize them with the **push** stream: because the effects follow the wiring API, this will return an array of listener functions and undefined values. Some effects––bidirectional and outgoing effects––will return a function, the listener, while effects not interested in the state––incoming effects––will return `undefined`. We need to filter those out, and we do with `filter((listener) => listener != null)`. We get a list of listeners as a result.
+To get the listeners for the various effects, we first map over all the effects and initialize them with the **push** stream: following the wiring API, they will return either functions and undefined values––incoming effects that are not interested in the state will return `undefined`. We need to filter those out, and we do with `filter((listener) => listener != null)`. There, we have our array of listeners now.
 
-In the last lines, we subscribe a function to the deduplicatedStore stream, and this function will take the state and call each the listeners with it. Easy. We could totally use `map` instead of `on`, but using `on` renders visible that we expect **side effects** to happen in the listeners and are not interested in their return values.
+In the last lines, we subscribe a function to the deduplicatedStore stream, and this function will take the state and call each of the listeners with it. Easy. We could totally use `map` instead of `on`, but using `on` renders visible that we expect **side effects** to happen in the listeners and we are not interested in their return values.
 
 That’s all there is to it. Note that if the wiring API would force effects to always return a listener function, it will be even simpler:
 
@@ -612,9 +612,9 @@ That’s all there is to it. Note that if the wiring API would force effects to 
 
 …and if Flyd would have a deduplication function out of the box, we would be able to even remove the `deduplicatedStore`.
 
-We implemented all the wiring in a very small amount of code. It’s a good thing: our `index.js` is almost entirely generic (we could have an `effects/index.js` and import all effects in one statement to make it completely generic) and that means that our `index.js` is boilerplate. Boilerplate should be kept small.
+We implemented all the wiring in a very small amount of code. It’s a good thing: our `index.js` is almost entirely generic and that means that our `index.js` is boilerplate. Boilerplate should be kept small.
 
-> If all the operations in `index.js` are generic, can I get it as a function instead of writing boilerplate? Well, most certainly we could write such function, but I meant to demonstrate how simple the integration is without any magic, and also to prove a point of how the same integration can be done with multiple libraries. If this architecture is successful, such library should most certainly be published.
+> If all the operations in `index.js` are generic, can I get it as a function instead of writing boilerplate? Well, we could write such function, but I meant to demonstrate how simple the integration is, without using any magic, and also to prove a point of how the same integration can be done with different libraries. If this architecture is successful, such library should most certainly be published.
 
 // TODO: Link Redux example
 
