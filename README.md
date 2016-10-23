@@ -584,7 +584,9 @@ React is not the only tool around for that: you can also try out [Preact](https:
 
 ## Gotchas and easter eggs
 
-The application has two bugs that were left there to demonstrate the kind of quirks that can emerge out of this architecture, and I will discuss here possible solutions.
+Even with a reasonable architecture, nondeterministic operations are hard. The best we can hope for––at least for now––is to have an architecture that makes it easy to find and solve the issues arising from them.
+
+The application has two bugs that were left there to demonstrate the kind of quirks that can emerge in this type of application, and ways to fix them within the approach of the architecture. Hopefully they will serve as a source of inspiration for how to fix analogous bugs in functional-reactive applications.
 
 ### “Reseed then undo” bug
 
@@ -813,6 +815,14 @@ The **upside**: this approach is far more powerful than the helper one. By movin
 
 Sometimes, decoupling just means **coupling with the right thing**.
 
+> Note that rewriting a nondeterministic operation to be deterministic is a staple of the functional way. Functional programming is completely deterministic and cannot handle (side)effects happening inside it’s wiring: to be able to perform nondeterministic operations, functional programming puts these operations in safe containers called [monads](https://drboolean.gitbooks.io/mostly-adequate-guide/content/ch9.html). The result is that effects are pushed out, away from the main logic.
+>
+> In a way, the whole architecture presented here aims at reproducing the success and idea behind monads, but using a reactive programming interface to make it easier to understand, since purely functional programming code is highly abstract, very formalized and consequently hard to follow.
+>
+> A fault I often see in purely functional code is idioms taking the spotlight and making the application purpose harder and harder to discern below them: this refers to [Cheng Lou’s React Europe talk](https://www.youtube.com/watch?v=mVVNJKv9esE) about solving the problems in the right level of abstraction.
+>
+> My point of view is that the purely functional approach abstracts way too high. My hope is that this approach hits closer to the sweet spot.
+
 ### “Sync then reseed” bug
 
 This bug is a variation of the previous one. The fix is the same, because the underlying problem is the same. Why mentioning it at all?
@@ -840,6 +850,7 @@ This bug is a variation of the previous one. The fix is the same, because the un
 - [Redux](http://redux.js.org/) which's "single store" idea heavily inspired this architecture.
 - [@joaomilho](https://github.com/joaomilho) who originally gave me the idea of using [`flyd`](https://github.com/paldepind/flyd) to re implement the Redux store, and who's [Act framework](https://github.com/act-framework/act) and [Ion language](https://github.com/ion-lang/ion) motivated the wish to do more and more functional and reactive programming in JavaScript.
 - [@Nevon](https://github.com/Nevon)'s [demystifying Redux](https://gist.github.com/Nevon/eada09788b10b6a1a02949ec486dc3ce)
+- [Professor Frisby’s Mostly Adequate Guide to Functional programming ](https://drboolean.gitbooks.io/mostly-adequate-guide/content/) and his [Classroom Coding](https://www.youtube.com/watch?v=h_tkIpwbsxY) video series that really helped me out in understanding the core concepts of the approach.
 
 ---
 
