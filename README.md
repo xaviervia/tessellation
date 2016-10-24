@@ -817,7 +817,8 @@ export default (seed, counter) => {
     counter
   ) * 10000
   return x - floor(x)
-}```
+}
+```
 
 …then in the `reducers/app.js`:
 
