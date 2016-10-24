@@ -808,12 +808,16 @@ First we need a seedable random number generation library. Unfortunately JavaScr
 
 ```javascript
 // New file: src/lib/seedableRandom.js
+import {reduce} from 'ramda'
 const {floor, sin} = Math
-export default (seed) => (counter) => {
-  const x = sin(seed + counter) * 10000
+
+export default (seed, counter) => {
+  const x = sin(
+    reduce((value, char) => value + char.charCodeAt(0), 0, seed.split('')) +
+    counter
+  ) * 10000
   return x - floor(x)
-}
-```
+}```
 
 …then in the `reducers/app.js`:
 
