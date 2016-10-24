@@ -723,6 +723,8 @@ I can come up with two different strategies for solving this issue. Each has its
 
 #### The helper way
 
+> You can see an implementation of this fix in [tessellation-fix-helper-way](https://github.com/xaviervia/tessellation-fix-helper-way).
+
 > “Extract the random point generator and reuse it in the Reseed button action handler.”
 
 A very obvious solution would be to go to the [`effects/seed.js`](src/effects/seed.js) file:
@@ -787,6 +789,8 @@ The **upside**: this way of refactoring is familiar. [It’s a close analog of E
 This is not a great upside. If we take familiarity as a litmus test for good architecture, we shouldn’t be trying a functional-reactive approach, we should just stick with whatever we were doing before.
 
 #### The state way
+
+> You can see an implementation of this fix in [tessellation-fix-state-way](https://github.com/xaviervia/tessellation-fix-state-way).
 
 I’d love to call this one, “The ironic way”. The idea is to:
 
