@@ -717,9 +717,9 @@ This was an honest-to-God bug that I introduced when originally building this ap
 
 How does the bug happen? Well, as you can see, being that the Reseed button does not actually **seed** but rather **clears** the points, it is only natural that the undo operation will simply undo the **seeding**, going back to the clean state with no points. This will, in turn, cause the Seed effect to activate and send a freshly baked set of random points again.
 
-How could this be solved?
+#### How could this be solved?
 
-I can come up with two different strategies for solving this issue. Each has its own merits, but I find the second one more intriguing: it introduces a very state-centric way of thinking about the problem. A way of thinking that would have prevented the clever move from being problematic in the first place.
+I can come up with two different strategies for solving this issue. Each has its own merits, but I find the second one more intriguing: it introduces a very state-centric way of thinking about the problem. A way of thinking that would have prevented the need for the “clever” move in the first place.
 
 #### The helper way
 
@@ -792,13 +792,15 @@ I’d love to call this one, “The ironic way”. The idea is to:
 
 > Make randomness deterministic, and complete the seed operation in the reducer for **APP_SEED**
 
-This sounds crazy. The point of randomness is that is not deterministic. Well, not quite.
+This sounds crazy. The point of randomness is that is not deterministic.
+
+Well, not quite.
 
 The point of randomness is that you can’t predict it. Determinism is a different matter, and according to your worldview [randomness might not exist or be embedded in everything](https://en.wikipedia.org/wiki/Bohr%E2%80%93Einstein_debates); entropy however **does exist** from a statistical point of view, and it’s what we use to get values that we can’t predict in otherwise predictable systems.
 
-I’ll try not to digress too much, but an important component of [(pseudo)randomness in computer software is mathematical functions](https://en.wikipedia.org/wiki/Pseudorandom_number_generator) that return values between 0 and 1 so that, for any `𝑓(x)`, `𝑓(x + 1)` is not easily predictable. Moreover, if you were to plot a vast amount of values of the pseudo-random number generation function you would not find any discernible pattern, nor be able to extract any statistical clustering of values around a specific number. That is in an ideal world; in reality there are only worse or better approximations.
+I’ll try not to digress too much, but an important component of [(pseudo)randomness in computer software is mathematical functions](https://en.wikipedia.org/wiki/Pseudorandom_number_generator) that return values between 0 and 1 so that, for any `𝑓(x)`, `𝑓(x + 1)` is not easily predictable without knowing the actual function before hand. Moreover, if you were to plot a vast amount of values of `𝑓(x)` you would not find any discernible pattern, nor be able to extract any statistical clustering of values around a specific number. That is in an ideal world; in reality there are only better or worse approximations.
 
-> While I don’t want to abound in this topic, it is worth noting that unpredictability is a core subject of the work around architectures built to operate with asynchronous interactions with the outside world.
+> It is worth noting that unpredictability is a core subject in the work around architectures built to operate with asynchronous interactions with the outside world.
 
 Either way, a pseudo-random number generation function is not random per se: if you send the same sequence of `x`s to it, you get the same values of `𝑓(x)`. This proves useful in real life, since to test the behavior of a program you might want to bombard it with random numbers, but if it fails, you will want to reproduce the random sequence to see what went wrong. Many pseudo-random number generation libraries provide functions that can be invoked with arbitrary values and will then return **another function** which will produce a sequence of pseudo-random numbers; in these libraries, calling the “factory function” with the same value will result in a set of functions that will produce the same sequence of numbers, every time. This is called **seeding** a pseudo-random number sequence.
 
@@ -955,7 +957,7 @@ The **downsize**: it requires us to understand how pseudo-random number generati
 
 The **upside**: this approach is far more powerful than the helper one. By moving the logic upstream from the effect to the state, we got the actual generation embedded in the application update function, which means that now any effect can use it.
 
-“But the number generation became coupled with the reducer! Isn’t it better to have it in a decoupled helper!” you say. Yes and no. The fact is that is being done in a reducer is absolutely correct. It’s application logic, so it should be part of the state update function one way or another. We can still extract a helper for the point generation, but it will have a completely different signature from the `getRandomizedPoints` helper.
+“But the number generation became coupled with the reducer! Isn’t it better to have it in a decoupled helper!” you say. Yes and no. The fact is that this logic is now being done in a reducer is absolutely correct. It’s application logic, so it should be part of the state update function one way or another. We can still extract a helper for the point generation, but it will have a completely different signature from the `getRandomizedPoints` helper.
 
 Sometimes, decoupling just means **coupling with the right thing**.
 
@@ -966,6 +968,11 @@ Sometimes, decoupling just means **coupling with the right thing**.
 > A fault I often see in purely functional code is arcane idioms taking the spotlight and making the application purpose harder and harder to discern below them: this refers to [Cheng Lou’s React Europe talk](https://www.youtube.com/watch?v=mVVNJKv9esE) about solving the problems in the right level of abstraction.
 >
 > My point of view is that the purely functional approach abstracts way too high. My hope is that this approach hits closer to the sweet spot.
+
+Some corollaries of this approach that show how robust it can be:
+
+- Reseeding after an Undo will result in the same sequence being created. Since the Undo resets the counter to the previous value, it stands to reasons that the same values will be generated when seeding again.
+- For any particular state, Reseeding will give the same value in every window.
 
 ### “Sync then reseed” bug
 
