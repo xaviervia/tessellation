@@ -25,7 +25,7 @@ This project is a thesis on how to build front end applications.
 - [Core application logic](#core-application-logic)
 - [High order reducers](#high-order-reducers)
 - [Effects](#effects) – the [Effect Wiring API](#effect-wiring-api) is of special importance.
-- [Putting it all together](#putting-it-all-together)
+- [Putting it all together](#putting-it-all-together) – here you can also find [Implementations with other libraries](#implementations-with-other-libraries)
 - [Debugging](#debugging)
 - [Libraries](#libraries)
 - [Gotchas and easter eggs](#gotchas-and-easter-eggs)
@@ -616,7 +616,9 @@ We implemented all the wiring in a very small amount of code. It’s a good thin
 
 > If all the operations in `index.js` are generic, can I get it as a function instead of writing boilerplate? Well, we could write such function, but I meant to demonstrate how simple the integration is, without using any magic, and also to prove a point of how the same integration can be done with different libraries. If this architecture is successful, such library should most certainly be published.
 
-// TODO: Link Redux example
+### Implementations with other libraries
+
+- [Redux](https://github.com/xaviervia/tessellation-redux/blob/master/src/index.js)
 
 ## Debugging
 
