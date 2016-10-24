@@ -815,13 +815,16 @@ export default (seed) => (counter) => {
 }
 ```
 
-Then in the `reducers/app.js`:
+…then in the `reducers/app.js`:
 
 ```diff
-import {set} from 'ramda'
+-import {set} from 'ramda'
++import {map, range, set} from 'ramda'
 
 import * as lenses from 'lenses'
 +import seedableRandom from 'lib/seedableRandom'
++
++const {floor} = Math
 
 export default (actions) => (reducer) => (state, {type, payload}) => {
   switch (type) {
@@ -896,6 +899,49 @@ export default (actions) => (reducer) => (state, {type, payload}) => {
       return reducer(state, {type, payload})
   }
 }
+```
+
+…in `effects/seed.js`:
+
+```diff
+-import {map, range} from 'ramda'
+import {APP_SEED} from 'actions'
+
+-const {floor, random} = Math
+-
+// This effect needs to be loaded last
+// to avoid colliding with any state recovered from localStorage
+export default (push) => (state) => state.shared.points.length === 0 &&
+  push({
+-    type: APP_SEED,
+-    payload: map(
+-      () => [floor(random() * 100), floor(random() * 100)],
+-      range(0, 9)
+-    )
++    type: APP_SEED
+  })
+```
+
+…and in `effects/view.js`:
+
+```diff
+import {voronoi} from 'd3-voronoi'
+import Button from 'components/Button'
+
+import * as selectors from 'selectors'
+-import {APP_UNDO, POINTS_ADD, POINTS_CLEANUP} from 'actions'
++import {APP_UNDO, POINTS_ADD, APP_SEED} from 'actions'
+
+...
+
+          <Button
+-            onClick={() => push({ type: POINTS_CLEANUP })}
++            onClick={() => push({ type: APP_SEED })}
+            title='reseed'>
+            ✕
+          </Button>
+
+...
 ```
 
 There is some repetition that could be refactored out, but if we were to do that now we can do it as a high order reducer instead of a helper.
