@@ -717,7 +717,7 @@ This was an honest-to-God bug that I introduced when originally building this ap
 >
 > But I digress.
 
-How does the bug happen? Well, as you can see, being that the Reseed button does not actually **seed** but rather **clears** the points, it is only natural that the undo operation will simply undo the **seeding**, going back to the clean state with no points. This will, in turn, cause the Seed effect to activate and send a freshly baked set of random points again.
+How does the bug happen? Well, the Reseed button does not actually **seed** but rather **clears** the points which gets immediately reseeded, so the Undo operation will remove the reseeding and go back to a clean state without points. This will, in turn, cause the Seed effect to activate and send a freshly baked set of random points again.
 
 #### How could this be solved?
 
