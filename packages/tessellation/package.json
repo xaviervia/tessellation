@@ -1,6 +1,6 @@
 {
   "name": "tessellation",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Function tools for creating Apps that follow the Tessellation architecture",
   "main": "dist/index.js",
   "scripts": {
@@ -13,7 +13,8 @@
     "test:lint": "sagui lint",
     "test:typecheck": "sagui typecheck",
     "test:unit": "cross-env NODE_ENV=test sagui test",
-    "test:unit:watch": "npm run test:unit -- --watch"
+    "test:unit:watch": "npm run test:unit -- --watch",
+    "prepublish": "make build"
   },
   "keywords": [
     "tessellation",
