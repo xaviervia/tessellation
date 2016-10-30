@@ -1,16 +1,21 @@
 # Library for Tessellation
 
 ```
-npm install --save-dev tessellation
+npm install --save tessellation
 ```
 
-## createApp( initialState, [higherOrderReducer], [effect] )
+## createApp( initialState, [higherOrderReducer], [effect] ): app
+
+## action( actionType, reducer ): higherOrderReducer
+
+## renderReactComponent( ReactComponent, domElement ): effect
 
 ```javascript
 import React from 'react'
 import {
+  action,
   createApp,
-  containAndRenderReactComponent
+  renderReactComponent
 } from 'tessellation'
 
 createApp(
@@ -27,16 +32,23 @@ createApp(
         default:
           return reducer(state, action)
       }
-    }
+    },
+
+    action('REMOVE', (state, action) => ({
+      value: state.value - 1
+    }))
   ],
 
   [
-    containAndRenderReactComponent(
+    renderReactComponent(
       function View ({push, value}) {
         return <div>
           <span>{value}</span>
           <button onClick={() => push({type: 'ADD'})}>
             Add
+          </button>
+          <button onClick={() => push({type: 'REMOVE'})}>
+            Remove
           </button>
         </div>
       },
