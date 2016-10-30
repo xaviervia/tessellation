@@ -14,7 +14,8 @@
     "test:typecheck": "sagui typecheck",
     "test:unit": "cross-env NODE_ENV=test sagui test",
     "test:unit:watch": "npm run test:unit -- --watch",
-    "prepublish": "make build"
+    "prepublish": "make build",
+    "postpublish": "make clean"
   },
   "keywords": [
     "tessellation",
