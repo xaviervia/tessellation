@@ -137,11 +137,11 @@ The application logic is contained in the files placed directly under the `app/s
 
 It’s important to notice that, with the exception of `index.js`, **all of the above contain only pure functions**. There is nothing weird going on in them, and any complexity in the code is derived mostly from the complexity of the application functionality itself. I consider this one of the biggest achievements of this proposed architecture.
 
-> The [`debuggable`](app/src/reducers/debuggable.js) happ/igh order reducer is not pure, but the intent of that function is just to introspect the state while in development, so it doesn't really count.
+> The [`debuggable`](app/src/reducers/debuggable.js) higher-order reducer is not pure, but the intent of that function is just to introspect the state while in development, so it doesn't really count.
 
 The whole application state is contained in a single object blob, Redux style. Actually, the whole architecture is heavily inspired by Redux––with two differences:
 
-- To prove that the "single object" state approach trascends libraries and it's easily reproducible with any reactive programming library, Tessellation is not using Redux itself.
+- To prove that the "single object" state approach transcends libraries and it's easily reproducible with any reactive programming library, Tessellation is not using Redux itself.
 - Tesselation’s store is highly decoupled from the UI: Redux was originally meant to represent the data necessary to drive the UI, and the patterns that emerged around it reflect that intent. The thesis here is that the way Redux drives state can be used to manage any type of side effect, and for that purpose I introduced a generalized wiring interface that––so the argument goes––can be used for **any** side effect.
 
 To emphasize that the architecture is meant to be a generalization of Redux and not another Flux implementation––as in, another way of doing React––the nomenclature is slightly different:
@@ -158,9 +158,9 @@ The documentation itself warns us that `combineReducers` [is just a convenience]
 
 I came to favor a very different approach:
 
-## High order reducers
+## Higher-order reducers
 
-In this project I wanted to explore composition of reducers using a pattern that I saw presented in React Europe for [undoing](https://github.com/omnidan/redux-undo): high order reducers. In a nutshell, it means that instead of implementing your most basic reducer as:
+In this project I wanted to explore composition of reducers using a pattern that I saw presented in React Europe for [undoing](https://github.com/omnidan/redux-undo): higher-order reducers. In a nutshell, it means that instead of implementing your most basic reducer as:
 
 ```javascript
 const reducer = (state, action) => {
