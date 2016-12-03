@@ -104,7 +104,7 @@ createApp(reducer, initialState, effects)
 
 Tessellation is a generalization of Redux. In Tessellation, the principle of a single store is used to drive the whole app, not just the UI. 
 
-In order to achieve this it builds on top the [Effect Wiring API](https://github.com/xaviervia/tessellation#effect-wiring-api), which is a general interface for attaching side effects to the store. The Effect Wiring API is the core of the architecture, because it sets the pattern for how to deal with any kind of side effects in the same declarative manner. 
+In order to achieve this it builds on top of the [Effect Wiring API](https://github.com/xaviervia/tessellation#effect-wiring-api), which is a general interface for attaching side effects to the store. The Effect Wiring API is the core of the architecture, because it sets the pattern for how to deal with any kind of side effects in the same declarative manner. 
 
 Note that if you want to build a server-side app or any other type of non-React/non-React DOM app, you have to require the `createApp` function directly. While the library provides out-of-the-box support for React with the `createRenderEffect` function, React and React DOM are included as peer dependencies and won’t be included in your code if you import `tessellation/createApp` directly.
 
