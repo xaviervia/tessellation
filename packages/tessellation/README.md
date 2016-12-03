@@ -56,7 +56,9 @@ const effects = [
 createApp(reducer, initialState, effects)
 ```
 
-You can find a [more complete example in here](https://github.com/xaviervia/tessellation/blob/master/variations/with-library/src/index.js). That example is the [thesis app](https://xaviervia.github.io/tessellation/) implemented using this library.
+See this example in the [example](example/src/index.js) folder.
+
+You can also find a [more complete app in here](https://github.com/xaviervia/tessellation/blob/master/variations/with-library/src/index.js). This other example is the [Tessellation thesis app](https://xaviervia.github.io/tessellation/) implemented using this library.
 
 ## API
 
