@@ -618,7 +618,8 @@ We implemented all the wiring in a very small amount of code. It’s a good thin
 
 ### Implementations with other libraries
 
-- [Redux](https://github.com/xaviervia/tessellation-redux/blob/master/src/index.js)
+- [Redux](variations/redux/src/index.js)
+- [with Tessellation as library](variations/with-library/src/index.js)
 
 ## Debugging
 
@@ -644,7 +645,7 @@ export default (reducer) => (prevState, action) => {
 }
 ```
 
-> There is a working version of the debuggable being used in  [https://github.com/xaviervia/tessellation-debuggable](https://github.com/xaviervia/tessellation-debuggable)
+> There is a working version of the debuggable being used in  [variations/debuggable](variations/debuggable)
 
 Extending this debugging tool should be rather straightforward.
 
@@ -718,7 +719,7 @@ I can come up with two different strategies for solving this issue. Each has its
 
 #### The helper way
 
-> You can see an implementation of this fix in [tessellation-fix-helper-way](https://github.com/xaviervia/tessellation-fix-helper-way).
+> You can see an implementation of this fix in [fix-helper-way](variations/fix-helper-way).
 
 > “Extract the random point generator and reuse it in the Reseed button action handler.”
 
@@ -785,7 +786,7 @@ This is not a great upside. If we take familiarity as a litmus test for good arc
 
 #### The state way
 
-> You can see an implementation of this fix in [tessellation-fix-state-way](https://github.com/xaviervia/tessellation-fix-state-way).
+> You can see an implementation of this fix in [fix-state-way](variations/fix-state-way).
 
 I’d love to call this one, “The ironic way”. The idea is to:
 
