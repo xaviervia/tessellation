@@ -2,6 +2,8 @@
 
 > v1.2.0 . See the live application in [https://xaviervia.github.io/tessellation/](https://xaviervia.github.io/tessellation/)
 
+If you are looking for the library to build apps using this architecture, go to the [tessellation library package](https://github.com/xaviervia/tessellation/tree/master/packages/tessellation) instead.
+
 ![tessellation screenshot](images/tessellation-app.png)
 
 > This app was tested and intended for a recent version of Chrome. It might not work somewhere else.
