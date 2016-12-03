@@ -24,7 +24,7 @@
     "redux"
   ],
   "author": "Fernando Vía Canel <fernando.via@gmail.com>",
-  "license": "ISC",
+  "license": "Unlicense",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/xaviervia/tessellation.git"
