@@ -1,23 +1,19 @@
-import {on, stream, scan} from 'flyd'
-import {compose, filter, map} from 'ramda'
-
 export default (reducer, initialState, effects) => {
-  const push = stream()
+  let state = initialState
+  let listeners = []
 
-  const listeners = compose(
-    filter((listener) => listener != null),
-    map((effect) => effect(push)),
-  )(effects)
+  const broadcast = (state) => {
+    listeners.forEach((listener) => listener(state))
+  }
 
-  const store = scan(reducer, initialState, push)
+  const push = (action) => {
+    state = reducer(state, action)
+    broadcast(state)
+  }
 
-  let prevState
-  on(
-    (nextState) => {
-      if (prevState !== nextState) {
-        listeners.forEach((listener) => listener(nextState))
-      }
-    },
-    store
-  )
+  listeners = effects
+    .map((effect) => effect(push))
+    .filter((listener) => listener != null)
+
+  broadcast(state)
 }
