@@ -4,9 +4,8 @@
  */
 module.exports = {
   libraries: [
-    'action',
     'createApp',
     'index',
-    'renderReactComponent'
+    'renderEffect'
   ]
 }
