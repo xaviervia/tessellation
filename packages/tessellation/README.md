@@ -104,9 +104,9 @@ createApp(reducer, initialState, effects)
 
 Tessellation is a generalization of Redux. In Tessellation, the principle of a single store is used to drive the whole app, not just the UI. 
 
-In order to achieve this it builds on top the [Effect Wiring API](https://github.com/xaviervia/tessellation#effect-wiring-api), which is a general interface for attaching side effects to the store. and it’s importance is that it sets the pattern for how to deal with any kind of side effects in the same declarative manner. 
+In order to achieve this it builds on top the [Effect Wiring API](https://github.com/xaviervia/tessellation#effect-wiring-api), which is a general interface for attaching side effects to the store. The Effect Wiring API is the core of the architecture, because it sets the pattern for how to deal with any kind of side effects in the same declarative manner. 
 
-Note that if you want to build a server-side app or any other type of non-React/non-React DOM app, you have to require the createApp directly. While the library provides out-of-the-box support for React, React and React DOM are included as peer dependencies and won't be used in your code if you import `tessellation/createApp` directly.
+Note that if you want to build a server-side app or any other type of non-React/non-React DOM app, you have to require the `createApp` function directly. While the library provides out-of-the-box support for React with the `createRenderEffect` function, React and React DOM are included as peer dependencies and won’t be used in your code if you import `tessellation/createApp` directly.
 
 In non-babel environments (such as plain Node, like in the example above), you will have to do:
 
@@ -118,11 +118,13 @@ const createApp = require('tessellation/createApp').default
 
 ### You can use the pattern with Redux
 
-**You don’t need to use this library**. Redux’s ecosystem is great and Tessellation doesn’t provide anything analogous to Redux DevTools. The central part of this library is the pattern used for the side effects. Tessellation could be described more as an extension of Redux, much like Redux Saga or Redux Promise or any other of the many solutions built to work with non-React side effects in the architecture. The difference is that you don’t need a library to follow this pattern, so Tessellation is more of a demonstration of an architecture rather than a utility lib. The lib exists just to make implementation of the architecture easier, but you can safely ignore it.
+**You don’t need to use this library**. Redux’s ecosystem is great and Tessellation doesn’t provide anything close to Redux DevTools. The central part of this library is the pattern used for the side effects. Tessellation could be described more as an extension of Redux than a replacement, much like Redux Saga or Redux Promise or any other of the many solutions built to work with non-React side effects in the Redux store. 
 
-This Effect Wiring API is by the way fully compatible with Redux—see the [implementation of the thesis app using Redux](https://github.com/xaviervia/tessellation/blob/master/variations/redux/src/index.js)—which means that you can just apply the pattern to your Redux application and ignore this library altogether. This is how you would build the first "Counter" example with Redux:
+The way in which Tessellation differs from the other Redux extensions is that you don’t need a library to follow its pattern, so Tessellation is more of a demonstration of an architecture rather than a utility lib. The lib exists just to make implementation of the architecture easier, but you can safely ignore it.
 
-```
+This Effect Wiring API is fully compatible with Redux—see the [implementation of the thesis app using Redux](https://github.com/xaviervia/tessellation/blob/master/variations/redux/src/index.js)—which means that you can just apply the pattern to your Redux application and ignore this library altogether. This is how you would build the CLI Counter example with Redux:
+
+```javascript
 const {createStore} = require('redux')
 const chalk = require('chalk')
 
@@ -173,6 +175,37 @@ subscribe(() => {
 
 broadcast()
 ```
+
+So these lines
+
+```javascript
+
+const {dispatch, subscribe, getState} = createStore(reducer, initialState)
+
+const listeners = effects
+  .map((effect) => effect(dispatch))
+  .filter((listener) => listener != null)
+
+const broadcast = () =>
+  listeners
+    .forEach((listener) => listener(getState()))
+
+let prevState
+subscribe(() => {
+  broadcast()
+  prevState = getState()
+})
+
+broadcast()
+```
+
+…and this line:
+
+```javascript
+createApp(reducer, initialState, effects)
+```
+
+…are equivalent.
 
 ## API
 
