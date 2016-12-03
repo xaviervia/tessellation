@@ -68,11 +68,20 @@ The library contains two functions:
 In pseudo-flowtype notation (`Action` is a [Flux Standard Action](https://github.com/acdlite/flux-standard-action)):
 
 ```typescript
-type Effect = <State>(Action) => (State): void
+type Push = (Action): void
 
-createApp = <State>(reducer: (State, Action) => State, initialState: State, effects: Array<Effect>): void
+type Effect = <State>(Push) => (State): void
 
-renderEffect( component: ReactComponent, target: DomElement ): Effect
+createApp = <State>(
+  reducer: (State, Action) => State, 
+  initialState: State, 
+  effects: Array<Effect>
+): void
+
+renderEffect(
+  component: ReactComponent, 
+  target: DomElement
+): Effect
 ```
 
 ## License
