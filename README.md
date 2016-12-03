@@ -1,6 +1,6 @@
 # Tessellation (thesis)
 
-> v1.1.0 . See the live application in [https://xaviervia.github.io/tessellation/](https://xaviervia.github.io/tessellation/)
+> v1.2.0 . See the live application in [https://xaviervia.github.io/tessellation/](https://xaviervia.github.io/tessellation/)
 
 ![tessellation screenshot](images/tessellation-app.png)
 
@@ -117,31 +117,31 @@ Open another browser window, go to [https://xaviervia.github.io/tessellation/](h
 
 ## Core application logic
 
-The application logic is contained in the files placed directly under the `src` and the `src/reducers` folders.
+The application logic is contained in the files placed directly under the `app/src` and the `app/src/reducers` folders.
 
-- [`actions.js`](src/actions.js) contains the constant declarations for the action types. I’m trying out using Symbols for action types constants. Symbols make for great action types because each Symbol is totally unique, which means that collision between them is impossible. I took inspiration for this from [Keith Cirkel’s Metaprogramming in ES6: Symbol’s and why they’re awesome](https://www.keithcirkel.co.uk/metaprogramming-in-es6-symbols/). Take this with a grain of salt: I haven’t tried it outside Chrome or in a real life app.
+- [`actions.js`](app/src/actions.js) contains the constant declarations for the action types. I’m trying out using Symbols for action types constants. Symbols make for great action types because each Symbol is totally unique, which means that collision between them is impossible. I took inspiration for this from [Keith Cirkel’s Metaprogramming in ES6: Symbol’s and why they’re awesome](https://www.keithcirkel.co.uk/metaprogramming-in-es6-symbols/). Take this with a grain of salt: I haven’t tried it outside Chrome or in a real life app.
 
-- [`index.html`](src/index.html) is the HTML entry point. [Sagui](https://github.com/saguijs/sagui) will configure [Webpack](https://webpack.github.io/) to load it with the corresponding `index.js`.
+- [`index.html`](app/src/index.html) is the HTML entry point. [Sagui](https://github.com/saguijs/sagui) will configure [Webpack](https://webpack.github.io/) to load it with the corresponding `index.js`.
 
-- [`index.js`](src/index.js) is the JavaScript entry point. It’s the only place where the effects meet the store, and the place where the application wiring is done. Note that, unlike in many other React applications, the `index.js` is **not in charge of rendering**: rendering the view is considered just another effect. Rendering is not part of the core of the application.
+- [`index.js`](app/src/index.js) is the JavaScript entry point. It’s the only place where the effects meet the store, and the place where the application wiring is done. Note that, unlike in many other React applications, the `index.js` is **not in charge of rendering**: rendering the view is considered just another effect. Rendering is not part of the core of the application.
 
   > This doesn’t mean that rendering is not **important**. As stated below, [effects are the whole point of an application](#effects). Saying that rendering is not part of the core means only that rendering is not state management logic.
 
-- [`lenses.js`](src/lenses.js) is the only file that is, to some extent, a **Ramda** artifact. Ramda provides this really cool functionality for selecting values in nested object structures that is done via [`lensPath`](http://ramdajs.com/docs/#lensPath) functions, which combined with [`view`](http://ramdajs.com/docs/#view) and [`set`](http://ramdajs.com/docs/#set) make for great ways of querying and immutably setting values in a complex state object. I still haven’t decided what to do with this file.
+- [`lenses.js`](app/src/lenses.js) is the only file that is, to some extent, a **Ramda** artifact. Ramda provides this really cool functionality for selecting values in nested object structures that is done via [`lensPath`](http://ramdajs.com/docs/#lensPath) functions, which combined with [`view`](http://ramdajs.com/docs/#view) and [`set`](http://ramdajs.com/docs/#set) make for great ways of querying and immutably setting values in a complex state object. I still haven’t decided what to do with this file.
 
-- [`selectors.js`](src/selectors.js) contains the functions that make it easy to query the state blob.
+- [`selectors.js`](app/src/selectors.js) contains the functions that make it easy to query the state blob.
 
-- [`store.js`](src/store.js) contains the initial state blob and the reducer, which is in turn built from all the high order reducers in `reducers/`.
+- [`store.js`](app/src/store.js) contains the initial state blob and the reducer, which is in turn built from all the high order reducers in `reducers/`.
 
-- [`reducers/`](src/reducers) contains files with each of the high order reducers.
+- [`reducers/`](app/src/reducers) contains files with each of the high order reducers.
 
 It’s important to notice that, with the exception of `index.js`, **all of the above contain only pure functions**. There is nothing weird going on in them, and any complexity in the code is derived mostly from the complexity of the application functionality itself. I consider this one of the biggest achievements of this proposed architecture.
 
-> The [`debuggable`](src/reducers/debuggable.js) high order reducer is not pure, but the intent of that function is just to introspect the state while in development, so it doesn't really count.
+> The [`debuggable`](app/src/reducers/debuggable.js) higher-order reducer is not pure, but the intent of that function is just to introspect the state while in development, so it doesn't really count.
 
 The whole application state is contained in a single object blob, Redux style. Actually, the whole architecture is heavily inspired by Redux––with two differences:
 
-- To prove that the "single object" state approach trascends libraries and it's easily reproducible with any reactive programming library, Tessellation is not using Redux itself.
+- To prove that the "single object" state approach transcends libraries and it's easily reproducible with any reactive programming library, Tessellation is not using Redux itself.
 - Tesselation’s store is highly decoupled from the UI: Redux was originally meant to represent the data necessary to drive the UI, and the patterns that emerged around it reflect that intent. The thesis here is that the way Redux drives state can be used to manage any type of side effect, and for that purpose I introduced a generalized wiring interface that––so the argument goes––can be used for **any** side effect.
 
 To emphasize that the architecture is meant to be a generalization of Redux and not another Flux implementation––as in, another way of doing React––the nomenclature is slightly different:
@@ -158,9 +158,9 @@ The documentation itself warns us that `combineReducers` [is just a convenience]
 
 I came to favor a very different approach:
 
-## High order reducers
+## Higher-order reducers
 
-In this project I wanted to explore composition of reducers using a pattern that I saw presented in React Europe for [undoing](https://github.com/omnidan/redux-undo): high order reducers. In a nutshell, it means that instead of implementing your most basic reducer as:
+In this project I wanted to explore composition of reducers using a pattern that I saw presented in React Europe for [undoing](https://github.com/omnidan/redux-undo): higher-order reducers. In a nutshell, it means that instead of implementing your most basic reducer as:
 
 ```javascript
 const reducer = (state, action) => {
@@ -211,7 +211,7 @@ The other obvious advantage is that a HOR can manipulate the result of another r
 
 ### The undoable high order reducer
 
-The following is the very simple implementation of the adding support for the **undo** operation with a high order reducer. It can be found in [`src/reducers/undoable.js`](src/reducers/undoable.js):
+The following is the very simple implementation of the adding support for the **undo** operation with a high order reducer. It can be found in [`app/src/reducers/undoable.js`](app/src/reducers/undoable.js):
 
 ```javascript
 export default (actionType) => (reducer) => (state, {type, payload}) => {
@@ -262,7 +262,7 @@ Note that:
   const reducer = undoable(APP_UNDO)(appHOR(pointsHOR((x) => x)))
   ```
 
-> You can see a variation of this in `src/store.js`. The actual implementation is more complex because it requires the full action dictionary to be passed in to each high order reducer: but that’s an implementation detail of which I'm not completely sure about.
+> You can see a variation of this in `app/src/store.js`. The actual implementation is more complex because it requires the full action dictionary to be passed in to each high order reducer: but that’s an implementation detail of which I'm not completely sure about.
 
 Any number of HORs can be chained in this way. Hopefully we can explore this further: it may be that, by adding configuration detailing what properties of that state tree the HORs should modify and what action types they should respond to, it becomes possible to have truly reusable pieces of application logic.
 
@@ -328,7 +328,7 @@ export default (push) => {
 
 ### LocalStorage effect
 
-> [code](src/effects/localStorage.js)
+> [code](app/src/effects/localStorage.js)
 
 ```javascript
 import {APP_SYNC} from 'actions'
@@ -368,7 +368,7 @@ The cross window/tab synchronization will conspire with another effect and [come
 
 ### Log effect
 
-> [code](src/effects/log.js)
+> [code](app/src/effects/log.js)
 
 Logs the current points with a nice format.
 
@@ -396,7 +396,7 @@ export default () => (state) => point(0)(state) &&
 
 ### Resize effect
 
-> [code](src/effects/resize.js)
+> [code](app/src/effects/resize.js)
 
 ```javascript
 import {APP_RESIZE} from 'actions'
@@ -425,7 +425,7 @@ export default (push) => {
 
 ### Seed effect
 
-> [code](src/effects/seed.js)
+> [code](app/src/effects/seed.js)
 
 If the state doesn’t already have any points, it seeds the application with 9 random points.
 
@@ -449,7 +449,7 @@ export default (push) => (state) => state.shared.points.length === 0 &&
 
 ### Setup effect
 
-> [code](src/effects/setup.js)
+> [code](app/src/effects/setup.js)
 
 When initialized, it immediately pushes an action with a newly generated UUID to identify the instance of the application. There is an interesting gotcha here: I initially modeled this as being part of the `initialState` object in the `store`, but you can see how that violates the purity of the store implementation.
 
@@ -471,7 +471,7 @@ export default (push) => {
 
 ### View effect
 
-> [code](src/effects/view.js)
+> [code](app/src/effects/view.js)
 
 > Too long to display inline
 
@@ -618,7 +618,8 @@ We implemented all the wiring in a very small amount of code. It’s a good thin
 
 ### Implementations with other libraries
 
-- [Redux](https://github.com/xaviervia/tessellation-redux/blob/master/src/index.js)
+- [Redux](variations/redux/src/index.js)
+- [with Tessellation as library](variations/with-library/src/index.js)
 
 ## Debugging
 
@@ -644,14 +645,7 @@ export default (reducer) => (prevState, action) => {
 }
 ```
 
-There are instructions for easily enabling this debugging in the `src/index.js`. If you want to try it out:
-
-1. `git clone git://github.com/xaviervia/tessellation`
-2. `cd tessellation`
-3. `npm install`
-4. In your editor, open the `src/index.js` and uncomment lines `4` and `12`, as instructed. Comment out line `10`
-5. `npm start`
-6. Open [http://localhost:3000](http://localhost:3000)
+> There is a working version of the debuggable being used in  [variations/debuggable](variations/debuggable)
 
 Extending this debugging tool should be rather straightforward.
 
@@ -695,7 +689,7 @@ What went wrong? Let’s enable the `debuggable` HOR and take a look at the acti
 
 As you can see, the **app/SEED** and **app/UNDO** are not the only operations happening. Why?
 
-If we take a look at the [implementation of the **Reseed** button](src/effects/view.js#L49):
+If we take a look at the [implementation of the **Reseed** button](app/src/effects/view.js#L49):
 
 ```javascript
 <Button
@@ -725,11 +719,11 @@ I can come up with two different strategies for solving this issue. Each has its
 
 #### The helper way
 
-> You can see an implementation of this fix in [tessellation-fix-helper-way](https://github.com/xaviervia/tessellation-fix-helper-way).
+> You can see an implementation of this fix in [fix-helper-way](variations/fix-helper-way).
 
 > “Extract the random point generator and reuse it in the Reseed button action handler.”
 
-A very obvious solution would be to go to the [`effects/seed.js`](src/effects/seed.js) file:
+A very obvious solution would be to go to the [`effects/seed.js`](app/src/effects/seed.js) file:
 
 ```javascript
 import {map, range} from 'ramda'
@@ -792,7 +786,7 @@ This is not a great upside. If we take familiarity as a litmus test for good arc
 
 #### The state way
 
-> You can see an implementation of this fix in [tessellation-fix-state-way](https://github.com/xaviervia/tessellation-fix-state-way).
+> You can see an implementation of this fix in [fix-state-way](variations/fix-state-way).
 
 I’d love to call this one, “The ironic way”. The idea is to:
 
@@ -815,7 +809,7 @@ Well, we could just do that: add a seed and a counter in the state, then invoke 
 First we need a seedable random number generation library. Unfortunately JavaScript doesn’t come with one––`Math.random` is not seedable. Since we are not trying to come up with a trustworthy randomness generation function that can be used in security or in casinos, we can make do with (a variation of) [Antti Sykäry’s answer in Stack Overflow](http://stackoverflow.com/a/19303725/5801727):
 
 ```javascript
-// New file: src/lib/seedableRandom.js
+// New file: app/src/lib/seedableRandom.js
 import {reduce} from 'ramda'
 const {floor, sin} = Math
 
