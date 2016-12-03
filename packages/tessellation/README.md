@@ -1,3 +1,5 @@
+<img src='image.png' />
+
 # Tessellation’s createApp
 
 Tessellation is a Redux-inspired architecture for applications, front-end or otherwise. It is one of the simplest ways of getting started with React. Like Redux, it makes a clear separation between the state management in the store and the components, making it possible for your components to be stateless functions; but Tessellation doesn’t require a `connect`, so it’s easier for beginners and it makes bootstrapping a new app very straightforward.
@@ -73,13 +75,13 @@ type Push = (Action): void
 type Effect = <State>(Push) => (State): void
 
 createApp = <State>(
-  reducer: (State, Action) => State, 
-  initialState: State, 
+  reducer: (State, Action) => State,
+  initialState: State,
   effects: Array<Effect>
 ): void
 
 renderEffect(
-  component: ReactComponent, 
+  component: ReactComponent,
   target: DomElement
 ): Effect
 ```
