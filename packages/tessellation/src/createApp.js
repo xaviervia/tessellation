@@ -20,12 +20,4 @@ export default (reducer, initialState, effects) => {
     },
     store
   )
-
-  return {
-    initialState,
-    highOrderReducers,
-    effects,
-    push,
-    store
-  }
 }

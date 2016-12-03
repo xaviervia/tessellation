@@ -4,7 +4,7 @@
 npm install --save tessellation
 ```
 
-## createApp( reducer, initialState, [effect] ): app
+## createApp( reducer, initialState, [effect] )
 
 ## renderEffect( ReactComponent, DomElement ): effect
 
