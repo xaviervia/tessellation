@@ -2,7 +2,7 @@
 
 # Tessellation’s createApp
 
-[![https://www.npmjs.com/package/tessellation](https://img.shields.io/npm/v/tessellation.svg?maxAge=10000)](https://www.npmjs.com/package/tessellation)
+[![https://api.travis-ci.org/xaviervia/tessellation.svg?branch=master](https://api.travis-ci.org/xaviervia/tessellation.svg?branch=master)](https://travis-ci.org/xaviervia/tessellation) [![https://www.npmjs.com/package/tessellation](https://img.shields.io/npm/v/tessellation.svg?maxAge=10000)](https://www.npmjs.com/package/tessellation)
 
 Tessellation is a Redux-inspired architecture for applications, front-end or otherwise. It is one of the simplest ways of getting started with React. Like Redux, it makes a clear separation between the state management in the store and the components, making it possible for your components to be stateless functions; but Tessellation doesn’t require a `connect`, so it’s easier for beginners and it makes bootstrapping a new app very straightforward.
 
