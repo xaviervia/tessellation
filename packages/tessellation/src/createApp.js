@@ -1,9 +1,7 @@
 import {on, stream, scan} from 'flyd'
-import {compose, filter, identity, map} from 'ramda'
+import {compose, filter, map} from 'ramda'
 
-export default (initialState, highOrderReducers, effects) => {
-  const reducer = compose(...highOrderReducers)(identity)
-
+export default (reducer, initialState, effects) => {
   const push = stream()
 
   const listeners = compose(
