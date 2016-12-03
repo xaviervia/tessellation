@@ -86,6 +86,10 @@ renderEffect(
 ): Effect
 ```
 
+## Credits
+
+- Voronoi Tessellation artwork from [Mike Bostock’s d3-voronoi example](https://bl.ocks.org/mbostock/4060366)
+
 ## License
 
 [The Unlicense](../../LICENSE)
