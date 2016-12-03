@@ -1,4 +1,4 @@
-<img src='image.png' />
+![tessellation](image.png)
 
 # Tessellation’s createApp
 
