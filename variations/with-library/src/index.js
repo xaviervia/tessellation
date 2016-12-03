@@ -1,7 +1,6 @@
-import {createStore} from 'redux'
-import {initialState, reducer} from 'store'
+import {createApp} from 'tessellation'
 
-import {compose, filter, map} from 'ramda'
+import {initialState, reducer} from 'store'
 
 import localStorage from 'effects/localStorage'
 import log from 'effects/log'
@@ -10,25 +9,4 @@ import seed from 'effects/seed'
 import setup from 'effects/setup'
 import view from 'effects/view'
 
-const store = createStore(reducer, initialState)
-
-const push = store.dispatch
-
-const effects = [localStorage, log, resize, seed, setup, view]
-
-const listeners = compose(
-  filter((listener) => listener != null),
-  map((effect) => effect(push)),
-)(effects)
-
-let prevState
-store.subscribe(
-  () => {
-    if (prevState !== store.getState()) {
-      listeners.forEach((listener) => listener(store.getState()))
-      prevState = store.getState()
-    }
-  }
-)
-
-listeners.forEach((listener) => listener(store.getState()))
+createApp(reducer, initialState, [localStorage, log, resize, seed, setup, view])
