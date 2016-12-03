@@ -10,7 +10,7 @@ const reducer = (state, action) => {
       }
 
     default:
-      return reducer(state, action)
+      return state
   }
 }
 
