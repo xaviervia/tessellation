@@ -4,18 +4,14 @@
   "description": "Function tools for creating Apps that follow the Tessellation architecture",
   "main": "dist/index.js",
   "scripts": {
-    "test": "npm run test:lint && npm run test:typecheck && npm run test:unit",
     "build": "sagui build",
-    "develop": "sagui develop --port 3000",
-    "dist": "cross-env NODE_ENV=production sagui build --optimize",
-    "start": "npm run develop",
-    "test:coverage": "npm run test:unit -- --coverage",
-    "test:lint": "sagui lint",
-    "test:typecheck": "sagui typecheck",
-    "test:unit": "cross-env NODE_ENV=test sagui test",
-    "test:unit:watch": "npm run test:unit -- --watch",
-    "prepublish": "make build",
-    "postpublish": "make clean"
+    "dist": "sagui build --optimize",
+    "start": "sagui develop --port 3000",
+    "test": "npm run test:lint && npm run test:typecheck && npm run test:unit",
+    "test:lint": "sagui test:lint",
+    "test:typecheck": "sagui test:typecheck",
+    "test:unit": "sagui test:unit --coverage",
+    "test:unit:watch": "sagui test:unit --watch"
   },
   "keywords": [
     "tessellation",
@@ -30,9 +26,9 @@
     "url": "git+https://github.com/xaviervia/tessellation.git"
   },
   "devDependencies": {
-    "sagui": "^7.1.1",
     "react": "^15.3.2",
-    "react-dom": "^15.3.2"
+    "react-dom": "^15.3.2",
+    "sagui": "8.0.0-rc.0"
   },
   "peerDependencies": {
     "react": "*",
