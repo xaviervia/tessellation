@@ -31,7 +31,7 @@ const reducer = (state, action) => {
       }
 
     default:
-      return reducer(state, action)
+      return state
   }
 }
 
@@ -76,7 +76,7 @@ const reducer = (state, action) => {
       })
 
     default:
-      return reducer(state, action)
+      return state
   }
 }
 
@@ -123,7 +123,55 @@ const createApp = require('tessellation/createApp').default
 This Effect Wiring API is by the way fully compatible with Redux—see the [implementation of the thesis app using Redux](https://github.com/xaviervia/tessellation/blob/master/variations/redux/src/index.js)—which means that you can just apply the pattern to your Redux application and ignore this library altogether. This is how you would build the first "Counter" example with Redux:
 
 ```
-TODO
+const {createStore} = require('redux')
+const chalk = require('chalk')
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'ADD':
+      return Object.assign({}, state, {
+        value: state.value + 1
+      })
+
+    default:
+      return state
+  }
+}
+
+const initialState = {value: 0}
+
+const effects = [
+  (push) => {
+    process.stdin.on('data', () => {
+      push({
+        type: 'ADD'
+      })
+    })
+
+    return (state) => {
+      console.log('The counter value is:', chalk.red(state.value))
+      console.log(chalk.gray(`Press ${chalk.white('ENTER')} to increase it`))
+    }
+  }
+]
+
+const {dispatch, subscribe, getState} = createStore(reducer, initialState)
+
+const listeners = effects
+  .map((effect) => effect(dispatch))
+  .filter((listener) => listener != null)
+
+const broadcast = () =>
+  listeners
+    .forEach((listener) => listener(getState()))
+
+let prevState
+subscribe(() => {
+  broadcast()
+  prevState = getState()
+})
+
+broadcast()
 ```
 
 ## API
