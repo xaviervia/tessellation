@@ -1,6 +1,6 @@
 # Tessellation (thesis)
 
-> v1.1.0 . See the live application in [https://xaviervia.github.io/tessellation/](https://xaviervia.github.io/tessellation/)
+> v1.2.0 . See the live application in [https://xaviervia.github.io/tessellation/](https://xaviervia.github.io/tessellation/)
 
 ![tessellation screenshot](images/tessellation-app.png)
 
