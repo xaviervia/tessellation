@@ -110,7 +110,7 @@ Note that if you want to build a server-side app or any other type of non-React/
 
 In non-babel environments—such as plain Node—you will have to do:
 
-```
+```javascript
 const createApp = require('tessellation/createApp').default
 ```
 
