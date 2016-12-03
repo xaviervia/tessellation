@@ -1,6 +1,6 @@
 {
   "name": "tessellation",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Thesis on how to build functional, reactive and well structured front end applications",
   "repository": {
     "url": "git+https://github.com/xaviervia/tessellation.git",
