@@ -1,35 +1,57 @@
-import {on, stream, scan} from 'flyd'
+import { Arrow } from 'zazen'
+import { effect } from 'tessellation'
+
 import {initialState, reducer} from 'store'
 
-import {compose, filter, map} from 'ramda'
+import {
+  apply,
+  compose,
+  filter,
+  map,
+  flatten
+} from 'ramda'
 
-import localStorage from 'effects/localStorage'
+import { APP_START } from 'actions'
+
 import log from 'effects/log'
 import resize from 'effects/resize'
 import seed from 'effects/seed'
-import setup from 'effects/setup'
 import view from 'effects/view'
 
-const push = stream()
+import debuggable from 'reducers/debuggable'
 
-const store = scan(reducer, initialState, push)
+const store = Arrow( app => ({
+  ...app,
+  state: app.actions.reduce(app.reducer, app.state)
+}))
 
-const effects = [localStorage, log, resize, seed, setup, view]
+const next = previous_app => (...actions) => {
+  return actions.length > 0 ?
+    app({...previous_app, actions}) :
+    previous_app
+}
 
-const deduplicatedStore = stream()
+const app = store
+  .pipe( app => ({
+    ...app,
+    next: next(app)
+  }) )
+  .pipe( ({state, next, effects}) => {
+    return compose(
+      apply(next),
+      flatten,
+      map( e => e({state, next}) )
+    )(effects)
+  })
 
-let prevState
-on((nextState) => {
-  prevState !== nextState && deduplicatedStore(nextState)
-  prevState = nextState
-}, store)
-
-const listeners = compose(
-  filter((listener) => listener != null),
-  map((effect) => effect(push)),
-)(effects)
-
-on(
-  (state) => listeners.forEach((listener) => listener(state)),
-  deduplicatedStore
-)
+app(app(app({
+  state: initialState,
+  actions: [],
+  reducer: debuggable(reducer),
+  effects: [
+    effect(seed),
+    effect(log),
+    effect(resize),
+    view,
+  ]
+})))

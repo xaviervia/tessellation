@@ -7,11 +7,13 @@ import undoable from 'reducers/undoable'
 import * as actions from 'actions'
 
 export const initialState = {
+  initial: true,
+
   local: {
     id: undefined,
     size: {
-      height: 0,
-      width: 0
+      height: undefined,
+      width: undefined
     }
   },
 

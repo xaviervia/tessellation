@@ -1,7 +1,16 @@
 import {APP_RESIZE} from 'actions'
 
-export default (push) => {
-  push({
+const initial = ({local: {size}}) => size.height === undefined
+
+let teardown = () => {}
+let prevState
+
+export default next => state  => {
+  if (state !== prevState) {
+    teardown()
+  }
+
+  const listener = () => next({
     type: APP_RESIZE,
     payload: {
       height: window.innerHeight,
@@ -9,11 +18,16 @@ export default (push) => {
     }
   })
 
-  window.addEventListener('resize', () => push({
+  window.addEventListener('resize', listener)
+
+  teardown = () => window.removeEventListener('resize', listener)
+  prevState = state
+
+  return initial(state) ? {
     type: APP_RESIZE,
     payload: {
       height: window.innerHeight,
       width: window.innerWidth
     }
-  }))
+  } : []
 }

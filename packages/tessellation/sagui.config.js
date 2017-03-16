@@ -4,6 +4,7 @@
  */
 module.exports = {
   libraries: [
+    'effect',
     'createApp',
     'index',
     'renderEffect'

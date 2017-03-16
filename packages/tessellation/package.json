@@ -14,10 +14,7 @@
     "test:unit:watch": "sagui test:unit --watch"
   },
   "keywords": [
-    "tessellation",
-    "reactive",
-    "functional",
-    "redux"
+    "tessellation"
   ],
   "author": "Fernando Vía Canel <fernando.via@gmail.com>",
   "license": "Unlicense",
@@ -26,12 +23,6 @@
     "url": "git+https://github.com/xaviervia/tessellation.git"
   },
   "devDependencies": {
-    "react": "^15.3.2",
-    "react-dom": "^15.3.2",
     "sagui": "8.0.0-rc.0"
-  },
-  "peerDependencies": {
-    "react": "*",
-    "react-dom": "*"
   }
 }

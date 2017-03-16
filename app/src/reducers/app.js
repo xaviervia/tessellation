@@ -4,6 +4,9 @@ import * as lenses from 'lenses'
 
 export default (actions) => (reducer) => (state, {type, payload}) => {
   switch (type) {
+    case actions.APP_START:
+      return payload
+
     case actions.APP_RESIZE:
       return set(
         lenses.size,
